@@ -15,16 +15,20 @@
         <strong>Win2016 Load Lab</strong>
       </div>
       <div class="topbar__links">
-        <a href="#dashboard">Dashboard</a>
-        <a href="#identity">닉네임 설정</a>
-        <a href="#leaderboard">Leaderboard</a>
+        <a id="nav-dashboard" href="#dashboard">대시보드</a>
+        <a id="nav-identity" href="#identity">닉네임 설정</a>
+        <a id="nav-leaderboard" href="#leaderboard">리더보드</a>
+      </div>
+      <div class="topbar__langs">
+        <button class="lang-btn active" data-lang="ko">한국어</button>
+        <button class="lang-btn" data-lang="en">English</button>
       </div>
     </nav>
     <header class="hero">
       <div class="hero__text">
         <p class="eyebrow">Windows Server 2016 · VMware · TS</p>
-        <h1>동적 부하 처리 웹서비스 &amp; Peak 성능 분석</h1>
-        <p class="lede">
+        <h1 id="hero-title">동적 부하 처리 웹서비스 &amp; Peak 성능 분석</h1>
+        <p class="lede" id="hero-lede">
           요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드.
           후배/수강생이 직접 버튼을 눌러 부하 변화를 체험할 수 있습니다.
         </p>
@@ -33,14 +37,14 @@
           <button class="pill" data-level="normal">Normal 부하</button>
           <button class="pill" data-level="peak">Peak 부하</button>
         </div>
-        <p class="note">IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능</p>
+        <p class="note" id="hero-note">IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능</p>
       </div>
       <div class="hero__panel">
         <div class="status-chip" id="stage-chip">현재 단계: Low</div>
         <div class="highlight">
-          <h3>Peak 대비 상태</h3>
+          <h3 id="highlight-title">Peak 대비 상태</h3>
           <p class="highlight__value" id="rps-highlight">-- req/s</p>
-          <p class="sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
+          <p class="sub" id="highlight-sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
           <div class="mini-grid">
             <div>
               <p class="label">CPU</p>
@@ -87,23 +91,23 @@
 
       <section class="panel" id="identity">
         <div>
-          <h3>닉네임 설정 (IP 기준)</h3>
-          <p class="sub">
+          <h3 id="identity-title">닉네임 설정 (IP 기준)</h3>
+          <p class="sub" id="identity-sub">
             실습자가 접속하면 자신의 IP에 매핑된 닉네임을 설정하고, 부하 테스트 결과가 리더보드에 기록됩니다.
             프라이버시를 위해 기본값은 익명 닉네임으로 시작합니다.
           </p>
           <form id="name-form" class="name-form">
             <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
-            <button type="submit" class="pill">저장</button>
+            <button type="submit" class="pill" id="name-save-btn">저장</button>
             <span class="name-status" id="name-status"></span>
           </form>
         </div>
         <div class="legend">
-          <p class="legend__title">기록 방식</p>
+          <p class="legend__title" id="identity-legend-title">기록 방식</p>
           <ul>
-            <li>IP별 15초 이동창으로 RPS/지연/오류율 계산</li>
-            <li>CPU/메모리 실측(`systeminformation`) 반영</li>
-            <li>최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장</li>
+            <li id="identity-legend-1">IP별 15초 이동창으로 RPS/지연/오류율 계산</li>
+            <li id="identity-legend-2">CPU/메모리 실측(`systeminformation`) 반영</li>
+            <li id="identity-legend-3">최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장</li>
           </ul>
         </div>
       </section>
@@ -115,7 +119,7 @@
               <p class="label">요청량 &amp; 응답 시간</p>
               <h3>RPS vs Response</h3>
             </div>
-            <p class="tag">실시간</p>
+            <p class="tag" id="tag-live">실시간</p>
           </div>
           <canvas id="rpsChart" height="130"></canvas>
         </div>
@@ -131,25 +135,25 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" id="steps">
         <div>
-          <h3>단계별 부하 실습</h3>
-          <p class="sub">
+          <h3 id="steps-title">단계별 부하 실습</h3>
+          <p class="sub" id="steps-sub">
             버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다.
             실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.
           </p>
           <ul class="steps">
-            <li>Low: 캐시 워밍업, 정상 지표 확인</li>
-            <li>Normal: 평균 응답 시간과 CPU 안정성 확인</li>
-            <li>Peak: 지연/오류율 상승 시 경고 배너 확인</li>
+            <li id="step-low">Low: 캐시 워밍업, 정상 지표 확인</li>
+            <li id="step-normal">Normal: 평균 응답 시간과 CPU 안정성 확인</li>
+            <li id="step-peak">Peak: 지연/오류율 상승 시 경고 배너 확인</li>
           </ul>
         </div>
         <div class="legend">
-          <p class="legend__title">모니터링 포인트</p>
+          <p class="legend__title" id="monitor-title">모니터링 포인트</p>
           <ul>
-            <li>Performance Monitor: % Processor Time, Available MBytes</li>
-            <li>로드툴: k6/AB/JMeter 결과와 그래프 비교</li>
-            <li>Task Manager 캡처로 실시간 리소스 공유</li>
+            <li id="monitor-1">Performance Monitor: % Processor Time, Available MBytes</li>
+            <li id="monitor-2">로드툴: k6/AB/JMeter 결과와 그래프 비교</li>
+            <li id="monitor-3">Task Manager 캡처로 실시간 리소스 공유</li>
           </ul>
         </div>
       </section>
@@ -157,9 +161,9 @@
       <section class="panel leaderboard" id="leaderboard">
         <div class="leaderboard__head">
           <div>
-            <p class="label">Leaderboard</p>
-            <h3>실시간 성능 순위</h3>
-            <p class="sub">최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.</p>
+            <p class="label" id="leaderboard-label">Leaderboard</p>
+            <h3 id="leaderboard-title">실시간 성능 순위</h3>
+            <p class="sub" id="leaderboard-sub">최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.</p>
           </div>
           <div class="badge-set">
             <span class="badge">Peak Breaker</span>
@@ -171,13 +175,13 @@
           <table>
             <thead>
               <tr>
-                <th>Rank</th>
-                <th>User</th>
-                <th>Peak RPS</th>
-                <th>Avg Latency</th>
-                <th>Error Rate</th>
-                <th>Server State</th>
-                <th>Stability</th>
+                <th id="th-rank">Rank</th>
+                <th id="th-user">User</th>
+                <th id="th-peak">Peak RPS</th>
+                <th id="th-latency">Avg Latency</th>
+                <th id="th-error">Error Rate</th>
+                <th id="th-state">Server State</th>
+                <th id="th-stability">Stability</th>
               </tr>
             </thead>
             <tbody id="leaderboard-body">

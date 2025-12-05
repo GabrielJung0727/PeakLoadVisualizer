@@ -106,7 +106,9 @@ app.post('/api/identity', (req, res) => {
   try {
     const rawName = (req.body?.name ?? '').toString().trim();
     if (!rawName || rawName.length < 2) {
-      return res.status(400).json({ error: '닉네임은 최소 2자 이상이어야 합니다.' });
+      return res
+        .status(400)
+        .json({ error: '닉네임은 최소 2자 이상이어야 합니다. (Name must be at least 2 characters.)' });
     }
     const name = rawName.slice(0, 32);
     const entry = ensureEntry(ip);
@@ -116,7 +118,7 @@ app.post('/api/identity', (req, res) => {
     res.json({ ok: true, entry });
   } catch (err) {
     console.error('identity error', err);
-    res.status(500).json({ error: '닉네임 저장 중 오류가 발생했습니다.' });
+    res.status(500).json({ error: '닉네임 저장 중 오류가 발생했습니다. (Failed to save nickname.)' });
   }
 });
 

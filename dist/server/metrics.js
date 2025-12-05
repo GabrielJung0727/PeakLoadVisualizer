@@ -44,11 +44,11 @@ async function getSystemStats() {
 function buildWarning(snapshot) {
     const flags = [];
     if (snapshot.responseTimeMs > 300)
-        flags.push('응답 지연');
+        flags.push('응답 지연 / Slow responses');
     if (snapshot.errorRate > 1.5)
-        flags.push('오류율 상승');
+        flags.push('오류율 상승 / Error rate high');
     if (snapshot.cpu > 85)
-        flags.push('CPU 포화');
+        flags.push('CPU 포화 / CPU saturation');
     return flags.length ? flags.join(' · ') : undefined;
 }
 async function collectMetrics(level) {

@@ -72,6 +72,29 @@ body {
   color: var(--text);
 }
 
+.topbar__langs {
+  display: flex;
+  gap: 8px;
+}
+
+.lang-btn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.lang-btn.active,
+.lang-btn:hover {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  color: #0b1226;
+  border-color: transparent;
+}
+
 .hero {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -394,6 +417,12 @@ tbody tr:hover {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+  }
+  .topbar__links {
+    flex-wrap: wrap;
+  }
+  .topbar__langs {
+    flex-wrap: wrap;
   }
 }
 

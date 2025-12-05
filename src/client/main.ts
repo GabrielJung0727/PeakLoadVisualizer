@@ -1,4 +1,5 @@
 type LoadLevel = 'low' | 'normal' | 'peak';
+type Lang = 'ko' | 'en';
 
 type MetricSnapshot = {
   level: LoadLevel;
@@ -25,6 +26,139 @@ type LeaderboardEntry = {
   updatedAt: number;
 };
 
+type Translations = {
+  navDashboard: string;
+  navIdentity: string;
+  navLeaderboard: string;
+  heroTitle: string;
+  heroLede: string;
+  heroNote: string;
+  highlightTitle: string;
+  highlightSub: string;
+  identityTitle: string;
+  identitySub: string;
+  identityLegendTitle: string;
+  identityLegend1: string;
+  identityLegend2: string;
+  identityLegend3: string;
+  stepsTitle: string;
+  stepsSub: string;
+  stepLow: string;
+  stepNormal: string;
+  stepPeak: string;
+  monitorTitle: string;
+  monitor1: string;
+  monitor2: string;
+  monitor3: string;
+  leaderboardLabel: string;
+  leaderboardTitle: string;
+  leaderboardSub: string;
+  warningPrefix: string;
+  stagePrefix: string;
+  metricsError: string;
+  leaderboardError: string;
+  leaderboardEmpty: string;
+  namePlaceholder: string;
+  nameLoaded: (name: string) => string;
+  nameSaved: (name: string) => string;
+  nameLoadError: string;
+  nameSaveError: string;
+  nameTooShort: string;
+  loadSwitchError: string;
+  tagLive: string;
+};
+
+const translations: Record<Lang, Translations> = {
+  ko: {
+    navDashboard: '대시보드',
+    navIdentity: '닉네임 설정',
+    navLeaderboard: '리더보드',
+    heroTitle: '동적 부하 처리 웹서비스 & Peak 성능 분석',
+    heroLede:
+      '요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드. 후배/수강생이 직접 버튼을 눌러 부하 변화를 체험할 수 있습니다.',
+    heroNote: 'IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능',
+    highlightTitle: 'Peak 대비 상태',
+    highlightSub: 'RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.',
+    identityTitle: '닉네임 설정 (IP 기준)',
+    identitySub:
+      '실습자가 접속하면 자신의 IP에 매핑된 닉네임을 설정하고, 부하 테스트 결과가 리더보드에 기록됩니다. 프라이버시를 위해 기본값은 익명 닉네임으로 시작합니다.',
+    identityLegendTitle: '기록 방식',
+    identityLegend1: 'IP별 15초 이동창으로 RPS/지연/오류율 계산',
+    identityLegend2: 'CPU/메모리 실측(systeminformation) 반영',
+    identityLegend3: '최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장',
+    stepsTitle: '단계별 부하 실습',
+    stepsSub:
+      '버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다. 실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.',
+    stepLow: 'Low: 캐시 워밍업, 정상 지표 확인',
+    stepNormal: 'Normal: 평균 응답 시간과 CPU 안정성 확인',
+    stepPeak: 'Peak: 지연/오류율 상승 시 경고 배너 확인',
+    monitorTitle: '모니터링 포인트',
+    monitor1: 'Performance Monitor: % Processor Time, Available MBytes',
+    monitor2: '로드툴: k6/AB/JMeter 결과와 그래프 비교',
+    monitor3: 'Task Manager 캡처로 실시간 리소스 공유',
+    leaderboardLabel: '리더보드',
+    leaderboardTitle: '실시간 성능 순위',
+    leaderboardSub: '최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.',
+    warningPrefix: 'Peak 단계 경고: ',
+    stagePrefix: '현재 단계:',
+    metricsError: '메트릭을 불러올 수 없습니다. 서버 상태를 확인하세요.',
+    leaderboardError: '리더보드를 불러올 수 없습니다.',
+    leaderboardEmpty: '데이터 수집 대기 중...',
+    namePlaceholder: '예: StudentA',
+    nameLoaded: (name: string) => `현재 닉네임: ${name}`,
+    nameSaved: (name: string) => `저장됨: ${name}`,
+    nameLoadError: '닉네임을 불러올 수 없습니다.',
+    nameSaveError: '저장 실패: 입력을 확인해주세요.',
+    nameTooShort: '2자 이상 입력하세요.',
+    loadSwitchError: '부하 단계 전환 실패',
+    tagLive: '실시간'
+  },
+  en: {
+    navDashboard: 'Dashboard',
+    navIdentity: 'Set Nickname',
+    navLeaderboard: 'Leaderboard',
+    heroTitle: 'Dynamic Load Service & Peak Performance Analysis',
+    heroLede:
+      'Raise load step-by-step and visualize RPS, CPU, memory, response time, and error rate in one view. Students can trigger changes themselves.',
+    heroNote: 'Works with IIS or Node.js (Express) + k6/AB/JMeter',
+    highlightTitle: 'Peak Readiness',
+    highlightSub: 'Polling RPS, latency, and error rate in real time.',
+    identityTitle: 'Nickname (per IP)',
+    identitySub:
+      'Set a nickname tied to your IP so your load-test results land on the leaderboard. Starts with an anonymous default for privacy.',
+    identityLegendTitle: 'How it records',
+    identityLegend1: '15s sliding window per IP for RPS/latency/error rate',
+    identityLegend2: 'CPU/memory from systeminformation (OS metrics)',
+    identityLegend3: 'Stores peak RPS, lowest avg latency, lowest error rate, stability score',
+    stepsTitle: 'Load Lab Steps',
+    stepsSub:
+      'Click a button to change load level; `/api/load/:level` and `/api/metrics` update together. Hook your k6/AB/JMeter runs here.',
+    stepLow: 'Low: Warm cache, verify baseline',
+    stepNormal: 'Normal: Watch avg latency and CPU stability',
+    stepPeak: 'Peak: Observe latency/error warnings',
+    monitorTitle: 'Monitoring Points',
+    monitor1: 'Performance Monitor: % Processor Time, Available MBytes',
+    monitor2: 'Load tools: compare k6/AB/JMeter results with graphs',
+    monitor3: 'Share Task Manager for live resource view',
+    leaderboardLabel: 'Leaderboard',
+    leaderboardTitle: 'Live Performance Ranking',
+    leaderboardSub: 'Ranked by peak RPS, lowest avg latency, error rate, and stability score.',
+    warningPrefix: 'Peak warning: ',
+    stagePrefix: 'Current stage:',
+    metricsError: 'Unable to load metrics. Check server health.',
+    leaderboardError: 'Unable to load leaderboard.',
+    leaderboardEmpty: 'Waiting for data...',
+    namePlaceholder: 'e.g., StudentA',
+    nameLoaded: (name: string) => `Current nickname: ${name}`,
+    nameSaved: (name: string) => `Saved: ${name}`,
+    nameLoadError: 'Failed to load nickname.',
+    nameSaveError: 'Save failed: check your input.',
+    nameTooShort: 'Enter at least 2 characters.',
+    loadSwitchError: 'Failed to change load level',
+    tagLive: 'Live'
+  }
+};
+
 declare const Chart: any;
 
 type ChartSet = {
@@ -33,7 +167,10 @@ type ChartSet = {
 };
 
 const MAX_POINTS = 30;
-const levelLabels: Record<LoadLevel, string> = { low: 'Low', normal: 'Normal', peak: 'Peak' };
+const levelLabels: Record<Lang, Record<LoadLevel, string>> = {
+  ko: { low: 'Low', normal: 'Normal', peak: 'Peak' },
+  en: { low: 'Low', normal: 'Normal', peak: 'Peak' }
+};
 
 const els = {
   warning: document.querySelector<HTMLElement>('#warning'),
@@ -57,6 +194,7 @@ const els = {
     input: document.querySelector<HTMLInputElement>('#name-input'),
     status: document.querySelector<HTMLElement>('#name-status')
   },
+  langButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('.lang-btn')),
   leaderboardBody: document.querySelector<HTMLTableSectionElement>('#leaderboard-body')
 };
 
@@ -67,12 +205,92 @@ const state: {
   leaderboardPollId?: number;
   identity?: Identity;
   leaderboard: LeaderboardEntry[];
+  lang: Lang;
+  lastSnapshot?: MetricSnapshot;
 } = {
   level: 'low',
-  leaderboard: []
+  leaderboard: [],
+  lang: (localStorage.getItem('lang') as Lang) === 'en' ? 'en' : 'ko'
 };
 
-function setWarning(message?: string) {
+const dict = () => translations[state.lang];
+
+function setText(id: string, value: string) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function applyLanguage(lang: Lang) {
+  state.lang = lang;
+  localStorage.setItem('lang', lang);
+  const d = dict();
+
+  setText('nav-dashboard', d.navDashboard);
+  setText('nav-identity', d.navIdentity);
+  setText('nav-leaderboard', d.navLeaderboard);
+  setText('hero-title', d.heroTitle);
+  setText('hero-lede', d.heroLede);
+  setText('hero-note', d.heroNote);
+  setText('highlight-title', d.highlightTitle);
+  setText('highlight-sub', d.highlightSub);
+  setText('identity-title', d.identityTitle);
+  setText('identity-sub', d.identitySub);
+  setText('identity-legend-title', d.identityLegendTitle);
+  setText('identity-legend-1', d.identityLegend1);
+  setText('identity-legend-2', d.identityLegend2);
+  setText('identity-legend-3', d.identityLegend3);
+  setText('steps-title', d.stepsTitle);
+  setText('steps-sub', d.stepsSub);
+  setText('step-low', d.stepLow);
+  setText('step-normal', d.stepNormal);
+  setText('step-peak', d.stepPeak);
+  setText('monitor-title', d.monitorTitle);
+  setText('monitor-1', d.monitor1);
+  setText('monitor-2', d.monitor2);
+  setText('monitor-3', d.monitor3);
+  setText('leaderboard-label', d.leaderboardLabel);
+  setText('leaderboard-title', d.leaderboardTitle);
+  setText('leaderboard-sub', d.leaderboardSub);
+  setText('tag-live', d.tagLive);
+  setText('th-rank', lang === 'ko' ? '순위' : 'Rank');
+  setText('th-user', lang === 'ko' ? '사용자' : 'User');
+  setText('th-peak', lang === 'ko' ? '최고 RPS' : 'Peak RPS');
+  setText('th-latency', lang === 'ko' ? '평균 지연' : 'Avg Latency');
+  setText('th-error', lang === 'ko' ? '오류율' : 'Error Rate');
+  setText('th-state', lang === 'ko' ? '서버 상태' : 'Server State');
+  setText('th-stability', lang === 'ko' ? '안정성' : 'Stability');
+
+  const nameInput = document.getElementById('name-input') as HTMLInputElement | null;
+  if (nameInput) nameInput.placeholder = d.namePlaceholder;
+  const nameBtn = document.getElementById('name-save-btn');
+  if (nameBtn) nameBtn.textContent = lang === 'ko' ? '저장' : 'Save';
+
+  els.buttons.forEach((btn) => {
+    const level = btn.dataset.level as LoadLevel;
+    btn.textContent =
+      level === 'low'
+        ? lang === 'ko' ? 'Low 부하' : 'Low Load'
+        : level === 'normal'
+        ? lang === 'ko' ? 'Normal 부하' : 'Normal Load'
+        : lang === 'ko'
+        ? 'Peak 부하'
+        : 'Peak Load';
+  });
+
+  els.langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
+
+  const stageLabel = levelLabels[lang][state.lastSnapshot?.level ?? state.level];
+  const stageChip = document.getElementById('stage-chip');
+  if (stageChip) stageChip.textContent = `${d.stagePrefix} ${stageLabel}`;
+  setText('card-stage', stageLabel);
+
+  if (state.lastSnapshot) {
+    updateCards(state.lastSnapshot);
+  }
+  renderLeaderboard(state.leaderboard);
+}
+
+function setWarning(message?: string, opts?: { prefix?: boolean }) {
   if (!els.warning) return;
   if (!message) {
     els.warning.hidden = true;
@@ -80,7 +298,8 @@ function setWarning(message?: string) {
     return;
   }
   els.warning.hidden = false;
-  els.warning.textContent = `Peak 단계 경고: ${message}`;
+  const usePrefix = opts?.prefix ?? true;
+  els.warning.textContent = usePrefix ? `${dict().warningPrefix}${message}` : message;
 }
 
 function updateCards(snapshot: MetricSnapshot) {
@@ -89,12 +308,13 @@ function updateCards(snapshot: MetricSnapshot) {
   els.cards.cpu!.textContent = `${snapshot.cpu.toFixed(1)}%`;
   els.cards.memory!.textContent = `${snapshot.memoryMb.toFixed(0)} MB`;
   els.cards.error!.textContent = `${snapshot.errorRate.toFixed(1)}%`;
-  els.cards.stage!.textContent = levelLabels[snapshot.level];
+  const label = levelLabels[state.lang][snapshot.level];
+  els.cards.stage!.textContent = label;
 
   els.highlights.rps!.textContent = `${snapshot.rps.toFixed(0)} req/s`;
   els.highlights.cpu!.textContent = `${snapshot.cpu.toFixed(1)}%`;
   els.highlights.memory!.textContent = `${snapshot.memoryMb.toFixed(0)} MB`;
-  els.highlights.stageChip!.textContent = `현재 단계: ${levelLabels[snapshot.level]}`;
+  els.highlights.stageChip!.textContent = `${dict().stagePrefix} ${label}`;
 }
 
 function limitPoints(chart: any) {
@@ -195,6 +415,17 @@ function setActiveButton(level: LoadLevel) {
   });
 }
 
+function bindLanguageSwitch() {
+  els.langButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const lang = btn.dataset.lang as Lang;
+      if (lang && lang !== state.lang) {
+        applyLanguage(lang);
+      }
+    });
+  });
+}
+
 async function setLoadLevel(level: LoadLevel) {
   try {
     const res = await fetch(`/api/load/${level}`, { method: 'POST' });
@@ -203,7 +434,7 @@ async function setLoadLevel(level: LoadLevel) {
     setActiveButton(level);
   } catch (err) {
     console.error(err);
-    setWarning('부하 단계 전환 실패');
+    setWarning(dict().loadSwitchError, { prefix: false });
   }
 }
 
@@ -217,6 +448,7 @@ async function refreshMetrics() {
     const res = await fetch('/api/metrics');
     if (!res.ok) throw new Error('metrics fetch failed');
     const snapshot = (await res.json()) as MetricSnapshot;
+    state.lastSnapshot = snapshot;
 
     updateCards(snapshot);
     setWarning(snapshot.warning);
@@ -227,7 +459,7 @@ async function refreshMetrics() {
     }
   } catch (err) {
     console.error(err);
-    setWarning('메트릭을 불러올 수 없습니다. 서버 상태를 확인하세요.');
+    setWarning(dict().metricsError, { prefix: false });
   }
 }
 
@@ -263,10 +495,10 @@ async function fetchIdentity() {
     const data = (await res.json()) as Identity;
     state.identity = data;
     els.identity.input.value = data.name;
-    setNameStatus(`현재 닉네임: ${data.name}`, 'ok');
+    setNameStatus(dict().nameLoaded(data.name), 'ok');
   } catch (err) {
     console.error(err);
-    setNameStatus('닉네임을 불러올 수 없습니다.', 'error');
+    setNameStatus(dict().nameLoadError, 'error');
   }
 }
 
@@ -283,18 +515,18 @@ async function saveIdentity(name: string) {
     }
     const data = await res.json();
     state.identity = data.entry;
-    setNameStatus(`저장됨: ${data.entry.name}`, 'ok');
+    setNameStatus(dict().nameSaved(data.entry.name), 'ok');
   } catch (err) {
     console.error(err);
-    const message = err instanceof Error ? err.message : '저장 실패: 입력을 확인해주세요.';
-    setNameStatus(message, 'error');
+    const message = err instanceof Error ? err.message : dict().nameSaveError;
+    setNameStatus(message || dict().nameSaveError, 'error');
   }
 }
 
 function renderLeaderboard(entries: LeaderboardEntry[]) {
   if (!els.leaderboardBody) return;
   if (!entries.length) {
-    els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">데이터 수집 대기 중...</td></tr>`;
+    els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">${dict().leaderboardEmpty}</td></tr>`;
     return;
   }
 
@@ -330,7 +562,7 @@ async function refreshLeaderboard() {
   } catch (err) {
     console.error(err);
     if (els.leaderboardBody) {
-      els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">리더보드를 불러올 수 없습니다.</td></tr>`;
+      els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">${dict().leaderboardError}</td></tr>`;
     }
   }
 }
@@ -341,7 +573,7 @@ function bindIdentityForm() {
     e.preventDefault();
     const name = els.identity.input!.value.trim();
     if (name.length < 2) {
-      setNameStatus('2자 이상 입력하세요.', 'error');
+      setNameStatus(dict().nameTooShort, 'error');
       return;
     }
     void saveIdentity(name);
@@ -354,8 +586,10 @@ function startLeaderboardPolling() {
 }
 
 function init() {
+  applyLanguage(state.lang);
   state.charts = setupCharts();
   bindControls();
+  bindLanguageSwitch();
   bindIdentityForm();
   startPolling();
   void fetchIdentity();
