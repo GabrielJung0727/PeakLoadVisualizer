@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows Server 2016 동적 부하 데모</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script type="module" src="/assets/main.js" defer></script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__text">
+        <p class="eyebrow">Windows Server 2016 · VMware · TS</p>
+        <h1>동적 부하 처리 웹서비스 &amp; Peak 성능 분석</h1>
+        <p class="lede">
+          요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드.
+          후배/수강생이 직접 버튼을 눌러 부하 변화를 체험할 수 있습니다.
+        </p>
+        <div class="hero__actions">
+          <button class="pill active" data-level="low">Low 부하</button>
+          <button class="pill" data-level="normal">Normal 부하</button>
+          <button class="pill" data-level="peak">Peak 부하</button>
+        </div>
+        <p class="note">IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능</p>
+      </div>
+      <div class="hero__panel">
+        <div class="status-chip" id="stage-chip">현재 단계: Low</div>
+        <div class="highlight">
+          <h3>Peak 대비 상태</h3>
+          <p class="highlight__value" id="rps-highlight">-- req/s</p>
+          <p class="sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
+          <div class="mini-grid">
+            <div>
+              <p class="label">CPU</p>
+              <p class="metric" id="cpu-highlight">--%</p>
+            </div>
+            <div>
+              <p class="label">메모리</p>
+              <p class="metric" id="memory-highlight">-- MB</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="warning" id="warning" hidden>Peak 단계 경고: 응답 지연/오류 발생</section>
+
+      <section class="grid">
+        <article class="card">
+          <p class="label">RPS</p>
+          <p class="value" id="card-rps">-- req/s</p>
+        </article>
+        <article class="card">
+          <p class="label">응답 시간</p>
+          <p class="value" id="card-latency">-- ms</p>
+        </article>
+        <article class="card">
+          <p class="label">CPU</p>
+          <p class="value" id="card-cpu">--%</p>
+        </article>
+        <article class="card">
+          <p class="label">메모리</p>
+          <p class="value" id="card-memory">-- MB</p>
+        </article>
+        <article class="card">
+          <p class="label">오류율</p>
+          <p class="value" id="card-error">--%</p>
+        </article>
+        <article class="card">
+          <p class="label">활성 단계</p>
+          <p class="value" id="card-stage">Low</p>
+        </article>
+      </section>
+
+      <section class="charts">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <p class="label">요청량 &amp; 응답 시간</p>
+              <h3>RPS vs Response</h3>
+            </div>
+            <p class="tag">모의 실시간</p>
+          </div>
+          <canvas id="rpsChart" height="130"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <p class="label">CPU &amp; 메모리</p>
+              <h3>리소스 사용률</h3>
+            </div>
+            <p class="tag">Performance Monitor 대응</p>
+          </div>
+          <canvas id="resourceChart" height="130"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div>
+          <h3>단계별 부하 실습</h3>
+          <p class="sub">
+            버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다.
+            실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.
+          </p>
+          <ul class="steps">
+            <li>Low: 캐시 워밍업, 정상 지표 확인</li>
+            <li>Normal: 평균 응답 시간과 CPU 안정성 확인</li>
+            <li>Peak: 지연/오류율 상승 시 경고 배너 확인</li>
+          </ul>
+        </div>
+        <div class="legend">
+          <p class="legend__title">모니터링 포인트</p>
+          <ul>
+            <li>Performance Monitor: % Processor Time, Available MBytes</li>
+            <li>로드툴: k6/AB/JMeter 결과와 그래프 비교</li>
+            <li>Task Manager 캡처로 실시간 리소스 공유</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
