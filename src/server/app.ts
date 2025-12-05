@@ -81,6 +81,7 @@ function updateLeaderboard(ip: string, snapshot: MetricSnapshot) {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   const start = process.hrtime.bigint();
   res.on('finish', () => {
@@ -102,16 +103,21 @@ app.get('/api/identity', (req, res) => {
 
 app.post('/api/identity', (req, res) => {
   const ip = getClientIp(req);
-  const rawName = (req.body?.name ?? '').toString().trim();
-  if (!rawName || rawName.length < 2) {
-    return res.status(400).json({ error: '닉네임은 최소 2자 이상이어야 합니다.' });
+  try {
+    const rawName = (req.body?.name ?? '').toString().trim();
+    if (!rawName || rawName.length < 2) {
+      return res.status(400).json({ error: '닉네임은 최소 2자 이상이어야 합니다.' });
+    }
+    const name = rawName.slice(0, 32);
+    const entry = ensureEntry(ip);
+    entry.name = name;
+    entry.updatedAt = Date.now();
+    leaderboard.set(ip, entry);
+    res.json({ ok: true, entry });
+  } catch (err) {
+    console.error('identity error', err);
+    res.status(500).json({ error: '닉네임 저장 중 오류가 발생했습니다.' });
   }
-  const name = rawName.slice(0, 32);
-  const entry = ensureEntry(ip);
-  entry.name = name;
-  entry.updatedAt = Date.now();
-  leaderboard.set(ip, entry);
-  res.json({ ok: true, entry });
 });
 
 app.get('/api/leaderboard', (_req, res) => {

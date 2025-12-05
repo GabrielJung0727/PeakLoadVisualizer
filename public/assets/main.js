@@ -225,7 +225,7 @@ async function saveIdentity(name) {
         });
         if (!res.ok) {
             const text = await res.text();
-            throw new Error(text);
+            throw new Error(text || '닉네임 저장 실패');
         }
         const data = await res.json();
         state.identity = data.entry;
@@ -233,7 +233,8 @@ async function saveIdentity(name) {
     }
     catch (err) {
         console.error(err);
-        setNameStatus('저장 실패: 입력을 확인해주세요.', 'error');
+        const message = err instanceof Error ? err.message : '저장 실패: 입력을 확인해주세요.';
+        setNameStatus(message, 'error');
     }
 }
 function renderLeaderboard(entries) {
