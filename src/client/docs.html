@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PeakLoadVisualizer Docs</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .doc-page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px;
+      }
+      .doc-page h1 {
+        margin-bottom: 8px;
+      }
+      .doc-page pre {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        overflow-x: auto;
+        color: var(--text);
+      }
+      .doc-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      .doc-list li {
+        margin: 6px 0;
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="doc-page">
+      <p class="eyebrow">PeakLoadVisualizer · Docs</p>
+      <h1>폴더 및 파일 구조</h1>
+      <p class="sub">리포지토리: <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a></p>
+
+      <h2>루트</h2>
+      <ul class="doc-list">
+        <li><code>README.md</code> — 프로젝트 개요와 실행 방법</li>
+        <li><code>package.json</code>, <code>tsconfig*.json</code> — 빌드/의존성/TS 설정</li>
+        <li><code>docs/</code> — 개요, 윈도우 셋업, 부하 계획 문서</li>
+        <li><code>src/</code> — TypeScript 소스 (서버/클라이언트)</li>
+        <li><code>public/</code> — 빌드된 정적 자산 배포 디렉터리</li>
+        <li><code>dist/</code> — 서버 빌드 산출물</li>
+      </ul>
+
+      <h2>서버 (<code>src/server</code>)</h2>
+      <ul class="doc-list">
+        <li><code>app.ts</code> — Express 서버, 정적 서빙, 메트릭/로드/리더보드/닉네임 API</li>
+        <li><code>metrics.ts</code> — 시스템 실측(CPU/메모리)과 요청 지연/오류율을 집계하여 `/api/metrics` 응답 생성</li>
+      </ul>
+
+      <h2>클라이언트 (<code>src/client</code>)</h2>
+      <ul class="doc-list">
+        <li><code>index.html</code> — 대시보드 UI, 부하 단계 전환, 리더보드 테이블, i18n, 도움말 툴팁</li>
+        <li><code>styles.css</code> — 레이아웃/테마/차트/툴팁 스타일</li>
+        <li><code>main.ts</code> — 메트릭 폴링, 부하 전환, 닉네임 저장, 리더보드 렌더링, 언어 전환, 도움말 로직</li>
+        <li><code>docs.html</code> — 현재 페이지(파일 구조 요약)</li>
+      </ul>
+
+      <h2>문서 (<code>docs/</code>)</h2>
+      <ul class="doc-list">
+        <li><code>overview.md</code> — 시나리오/기능/스택 개요</li>
+        <li><code>windows-setup.md</code> — VMware + Windows Server 2016 세팅</li>
+        <li><code>load-plan.md</code> — 부하 테스트 계획 및 메트릭 관측</li>
+      </ul>
+
+      <h2>빌드/실행</h2>
+      <pre><code>npm install
+npm run build
+npm start</code></pre>
+      <p class="sub">개발 모드: <code>npm run dev</code> (ts-node + 클라이언트 watch)</p>
+    </div>
+  </body>
+</html>

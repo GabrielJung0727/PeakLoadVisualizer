@@ -11,6 +11,7 @@ const app = (0, express_1.default)();
 const port = Number(process.env.PORT) || 3000;
 const publicDir = path_1.default.join(process.cwd(), 'public');
 const clientDir = path_1.default.join(process.cwd(), 'src/client');
+const docsFile = path_1.default.join(clientDir, 'docs.html');
 let currentLoad = 'low';
 const leaderboard = new Map();
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
@@ -128,6 +129,9 @@ app.post('/api/load/:level', (req, res) => {
 });
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });
+});
+app.get('/docs.html', (_req, res) => {
+    res.sendFile(docsFile);
 });
 app.get('*', (_req, res) => {
     res.sendFile(path_1.default.join(clientDir, 'index.html'));

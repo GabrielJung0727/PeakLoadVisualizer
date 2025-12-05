@@ -7,6 +7,7 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const publicDir = path.join(process.cwd(), 'public');
 const clientDir = path.join(process.cwd(), 'src/client');
+const docsFile = path.join(clientDir, 'docs.html');
 
 let currentLoad: LoadLevel = 'low';
 
@@ -145,6 +146,10 @@ app.post('/api/load/:level', (req, res) => {
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });
+});
+
+app.get('/docs.html', (_req, res) => {
+  res.sendFile(docsFile);
 });
 
 app.get('*', (_req, res) => {
