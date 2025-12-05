@@ -17,10 +17,17 @@ const els = {
         memory: document.querySelector('#memory-highlight'),
         stageChip: document.querySelector('#stage-chip')
     },
-    buttons: Array.from(document.querySelectorAll('[data-level]'))
+    buttons: Array.from(document.querySelectorAll('[data-level]')),
+    identity: {
+        form: document.querySelector('#name-form'),
+        input: document.querySelector('#name-input'),
+        status: document.querySelector('#name-status')
+    },
+    leaderboardBody: document.querySelector('#leaderboard-body')
 };
 const state = {
-    level: 'low'
+    level: 'low',
+    leaderboard: []
 };
 function setWarning(message) {
     if (!els.warning)
@@ -185,9 +192,116 @@ function startPolling() {
     void refreshMetrics();
     state.pollId = window.setInterval(refreshMetrics, 2000);
 }
+function setNameStatus(message, tone = 'muted') {
+    if (!els.identity.status)
+        return;
+    els.identity.status.textContent = message;
+    const color = tone === 'error' ? '#ff9f9f' : tone === 'ok' ? '#5dd5c4' : getComputedStyle(document.body).getPropertyValue('--muted');
+    els.identity.status.style.color = color;
+}
+async function fetchIdentity() {
+    if (!els.identity.input)
+        return;
+    try {
+        const res = await fetch('/api/identity');
+        if (!res.ok)
+            throw new Error('identity fetch failed');
+        const data = (await res.json());
+        state.identity = data;
+        els.identity.input.value = data.name;
+        setNameStatus(`현재 닉네임: ${data.name}`, 'ok');
+    }
+    catch (err) {
+        console.error(err);
+        setNameStatus('닉네임을 불러올 수 없습니다.', 'error');
+    }
+}
+async function saveIdentity(name) {
+    try {
+        const res = await fetch('/api/identity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text);
+        }
+        const data = await res.json();
+        state.identity = data.entry;
+        setNameStatus(`저장됨: ${data.entry.name}`, 'ok');
+    }
+    catch (err) {
+        console.error(err);
+        setNameStatus('저장 실패: 입력을 확인해주세요.', 'error');
+    }
+}
+function renderLeaderboard(entries) {
+    if (!els.leaderboardBody)
+        return;
+    if (!entries.length) {
+        els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">데이터 수집 대기 중...</td></tr>`;
+        return;
+    }
+    const rows = entries
+        .map((entry, idx) => {
+        const rank = idx + 1;
+        const rps = `${entry.peakRps.toFixed(1)} req/s`;
+        const latency = Number.isFinite(entry.bestLatency) ? `${entry.bestLatency.toFixed(0)} ms` : '--';
+        const errors = Number.isFinite(entry.bestErrorRate) ? `${entry.bestErrorRate.toFixed(1)}%` : '--';
+        const stability = `${Math.round(entry.stabilityScore)} pts`;
+        return `<tr>
+        <td>${rank}</td>
+        <td>${entry.name}</td>
+        <td>${rps}</td>
+        <td>${latency}</td>
+        <td>${errors}</td>
+        <td>${entry.serverState}</td>
+        <td>${stability}</td>
+      </tr>`;
+    })
+        .join('');
+    els.leaderboardBody.innerHTML = rows;
+}
+async function refreshLeaderboard() {
+    try {
+        const res = await fetch('/api/leaderboard');
+        if (!res.ok)
+            throw new Error('leaderboard fetch failed');
+        const data = (await res.json());
+        state.leaderboard = data.entries;
+        renderLeaderboard(state.leaderboard);
+    }
+    catch (err) {
+        console.error(err);
+        if (els.leaderboardBody) {
+            els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">리더보드를 불러올 수 없습니다.</td></tr>`;
+        }
+    }
+}
+function bindIdentityForm() {
+    if (!els.identity.form || !els.identity.input)
+        return;
+    els.identity.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = els.identity.input.value.trim();
+        if (name.length < 2) {
+            setNameStatus('2자 이상 입력하세요.', 'error');
+            return;
+        }
+        void saveIdentity(name);
+    });
+}
+function startLeaderboardPolling() {
+    void refreshLeaderboard();
+    state.leaderboardPollId = window.setInterval(refreshLeaderboard, 6000);
+}
 function init() {
     state.charts = setupCharts();
     bindControls();
+    bindIdentityForm();
     startPolling();
+    void fetchIdentity();
+    startLeaderboardPolling();
 }
 window.addEventListener('DOMContentLoaded', init);

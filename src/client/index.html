@@ -9,6 +9,17 @@
     <script type="module" src="/assets/main.js" defer></script>
   </head>
   <body>
+    <nav class="topbar">
+      <div class="topbar__brand">
+        <span class="dot"></span>
+        <strong>Win2016 Load Lab</strong>
+      </div>
+      <div class="topbar__links">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#identity">닉네임 설정</a>
+        <a href="#leaderboard">Leaderboard</a>
+      </div>
+    </nav>
     <header class="hero">
       <div class="hero__text">
         <p class="eyebrow">Windows Server 2016 · VMware · TS</p>
@@ -44,7 +55,7 @@
       </div>
     </header>
 
-    <main class="content">
+    <main class="content" id="dashboard">
       <section class="warning" id="warning" hidden>Peak 단계 경고: 응답 지연/오류 발생</section>
 
       <section class="grid">
@@ -74,6 +85,29 @@
         </article>
       </section>
 
+      <section class="panel" id="identity">
+        <div>
+          <h3>닉네임 설정 (IP 기준)</h3>
+          <p class="sub">
+            실습자가 접속하면 자신의 IP에 매핑된 닉네임을 설정하고, 부하 테스트 결과가 리더보드에 기록됩니다.
+            프라이버시를 위해 기본값은 익명 닉네임으로 시작합니다.
+          </p>
+          <form id="name-form" class="name-form">
+            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
+            <button type="submit" class="pill">저장</button>
+            <span class="name-status" id="name-status"></span>
+          </form>
+        </div>
+        <div class="legend">
+          <p class="legend__title">기록 방식</p>
+          <ul>
+            <li>IP별 15초 이동창으로 RPS/지연/오류율 계산</li>
+            <li>CPU/메모리 실측(`systeminformation`) 반영</li>
+            <li>최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장</li>
+          </ul>
+        </div>
+      </section>
+
       <section class="charts">
         <div class="chart-card">
           <div class="chart-header">
@@ -81,7 +115,7 @@
               <p class="label">요청량 &amp; 응답 시간</p>
               <h3>RPS vs Response</h3>
             </div>
-            <p class="tag">모의 실시간</p>
+            <p class="tag">실시간</p>
           </div>
           <canvas id="rpsChart" height="130"></canvas>
         </div>
@@ -117,6 +151,39 @@
             <li>로드툴: k6/AB/JMeter 결과와 그래프 비교</li>
             <li>Task Manager 캡처로 실시간 리소스 공유</li>
           </ul>
+        </div>
+      </section>
+
+      <section class="panel leaderboard" id="leaderboard">
+        <div class="leaderboard__head">
+          <div>
+            <p class="label">Leaderboard</p>
+            <h3>실시간 성능 순위</h3>
+            <p class="sub">최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.</p>
+          </div>
+          <div class="badge-set">
+            <span class="badge">Peak Breaker</span>
+            <span class="badge badge--alt">High Stability</span>
+            <span class="badge badge--speed">Speed Master</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Peak RPS</th>
+                <th>Avg Latency</th>
+                <th>Error Rate</th>
+                <th>Server State</th>
+                <th>Stability</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr><td colspan="7" class="muted">데이터 수집 대기 중...</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>

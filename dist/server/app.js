@@ -12,14 +12,24 @@ const port = Number(process.env.PORT) || 3000;
 const publicDir = path_1.default.join(process.cwd(), 'public');
 const clientDir = path_1.default.join(process.cwd(), 'src/client');
 let currentLoad = 'low';
-let lastSnapshot = (0, metrics_1.generateMetrics)(currentLoad);
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use((req, res, next) => {
+    const start = process.hrtime.bigint();
+    res.on('finish', () => {
+        const skipPaths = ['/api/metrics', '/api/health'];
+        if (skipPaths.some((prefix) => req.path.startsWith(prefix)))
+            return;
+        const durationMs = Number(process.hrtime.bigint() - start) / 1000000;
+        (0, metrics_1.recordRequest)(durationMs, res.statusCode);
+    });
+    next();
+});
 app.use(express_1.default.static(publicDir));
 app.use(express_1.default.static(clientDir));
-app.get('/api/metrics', (_req, res) => {
-    lastSnapshot = (0, metrics_1.generateMetrics)(currentLoad, lastSnapshot);
-    res.json(lastSnapshot);
+app.get('/api/metrics', async (_req, res) => {
+    const snapshot = await (0, metrics_1.collectMetrics)(currentLoad);
+    res.json(snapshot);
 });
 app.post('/api/load/:level', (req, res) => {
     const level = req.params.level;
@@ -28,8 +38,7 @@ app.post('/api/load/:level', (req, res) => {
         return res.status(400).json({ error: 'Invalid load level', allowed });
     }
     currentLoad = level;
-    lastSnapshot = (0, metrics_1.generateMetrics)(currentLoad, lastSnapshot);
-    res.json({ level: currentLoad, snapshot: lastSnapshot });
+    res.json({ level: currentLoad });
 });
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });

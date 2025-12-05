@@ -6,9 +6,11 @@
 - 서버 리소스(CPU/RAM)와 서비스 품질(RPS/응답시간/오류율)을 시각화해 교육·발표
 
 ## 핵심 기능
-- `/api/metrics`: 현재 부하 단계에 따른 모의 메트릭(RPS, CPU, 메모리, 응답시간, 오류율)
+- `/api/metrics`: 실시간 수집 메트릭(RPS, CPU, 메모리, 응답시간, 오류율)
+- 요청 종료 시 응답 시간/오류 여부 기록 → 이동 평균 RPS/지연/오류율 계산, CPU·메모리는 OS 실측(`systeminformation`)
 - `/api/load/:level`: Low/Normal/Peak 단계 전환 및 UI 반영
 - 정적 페이지(`src/client/index.html`): 실시간 그래프, 경고 배너, 단계 전환 버튼
+- 리더보드: IP별 닉네임 설정 후 최고 RPS/최저 지연/오류율/안정성 점수로 순위 노출
 
 ## 기술 스택 제안
 - 서버: Node.js + Express (TS)
