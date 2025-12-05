@@ -37,45 +37,74 @@
   <body>
     <div class="doc-page">
       <p class="eyebrow">PeakLoadVisualizer · Docs</p>
-      <h1>폴더 및 파일 구조</h1>
-      <p class="sub">리포지토리: <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a></p>
+      <h1>폴더/파일 구조 & 학습 가이드</h1>
+      <p class="sub">
+        리포지토리:
+        <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a>
+      </p>
+
+      <h2>빠른 시작</h2>
+      <pre><code>npm install
+npm run build
+npm start    # http://localhost:3000
+# 개발 모드: npm run dev  (ts-node + 클라이언트 watch)</code></pre>
+      <p class="sub">부하 도구(k6/AB/JMeter)로 요청을 보내면서 대시보드/리더보드가 갱신되는지 확인하세요.</p>
+
+      <h2>아키텍처 한눈에 보기</h2>
+      <ul class="doc-list">
+        <li><strong>서버</strong>: Node.js(Express) + TypeScript, `/api/metrics`에서 실측 CPU/메모리와 요청 지연/오류율 제공.</li>
+        <li><strong>클라이언트</strong>: HTML + TS(빌드 후 JS), Chart.js로 RPS/지연/CPU/메모리 시각화, 리더보드 표시.</li>
+        <li><strong>부하</strong>: k6/AB/JMeter 중 택1로 RPS/지연/오류율을 발생시켜 학습·비교.</li>
+        <li><strong>모니터링</strong>: Performance Monitor / Task Manager를 병행해 실제 자원 사용을 관찰.</li>
+      </ul>
 
       <h2>루트</h2>
       <ul class="doc-list">
-        <li><code>README.md</code> — 프로젝트 개요와 실행 방법</li>
-        <li><code>package.json</code>, <code>tsconfig*.json</code> — 빌드/의존성/TS 설정</li>
-        <li><code>docs/</code> — 개요, 윈도우 셋업, 부하 계획 문서</li>
-        <li><code>src/</code> — TypeScript 소스 (서버/클라이언트)</li>
-        <li><code>public/</code> — 빌드된 정적 자산 배포 디렉터리</li>
-        <li><code>dist/</code> — 서버 빌드 산출물</li>
+        <li><code>README.md</code> — 전체 개요, 실행 방법, API 설명.</li>
+        <li><code>package.json</code>, <code>tsconfig*.json</code> — 의존성/빌드/TypeScript 설정.</li>
+        <li><code>docs/</code> — 시나리오/윈도우 세팅/부하 계획 문서 원본.</li>
+        <li><code>src/</code> — TypeScript 소스(서버·클라이언트).</li>
+        <li><code>public/</code> — 빌드된 정적 자산(JS/CSS).</li>
+        <li><code>dist/</code> — 서버 빌드 산출물.</li>
       </ul>
 
       <h2>서버 (<code>src/server</code>)</h2>
       <ul class="doc-list">
-        <li><code>app.ts</code> — Express 서버, 정적 서빙, 메트릭/로드/리더보드/닉네임 API</li>
-        <li><code>metrics.ts</code> — 시스템 실측(CPU/메모리)과 요청 지연/오류율을 집계하여 `/api/metrics` 응답 생성</li>
+        <li><code>app.ts</code> — Express 엔트리: 정적 서빙, `/api/metrics`(실시간 메트릭), `/api/load/:level`(부하 단계), `/api/leaderboard`, `/docs.html` 라우트.</li>
+        <li><code>metrics.ts</code> — <strong>systeminformation</strong>으로 CPU/메모리 실측, 요청별 지연·오류율을 15초 윈도우로 집계, 경고 메시지 생성.</li>
       </ul>
 
       <h2>클라이언트 (<code>src/client</code>)</h2>
       <ul class="doc-list">
-        <li><code>index.html</code> — 대시보드 UI, 부하 단계 전환, 리더보드 테이블, i18n, 도움말 툴팁</li>
-        <li><code>styles.css</code> — 레이아웃/테마/차트/툴팁 스타일</li>
-        <li><code>main.ts</code> — 메트릭 폴링, 부하 전환, 닉네임 저장, 리더보드 렌더링, 언어 전환, 도움말 로직</li>
-        <li><code>docs.html</code> — 현재 페이지(파일 구조 요약)</li>
+        <li><code>index.html</code> — 대시보드 레이아웃, 부하 단계 버튼, 리더보드 테이블, 툴팁/언어 토글, Footer 링크.</li>
+        <li><code>styles.css</code> — 테마, 카드/패널/차트/툴팁 스타일.</li>
+        <li><code>main.ts</code> — 메트릭 폴링(2s), 부하 전환, 닉네임 로컬 저장, 리더보드 렌더링, i18n, 도움말 토글.</li>
+        <li><code>docs.html</code> — 이 문서 페이지.</li>
       </ul>
 
       <h2>문서 (<code>docs/</code>)</h2>
       <ul class="doc-list">
-        <li><code>overview.md</code> — 시나리오/기능/스택 개요</li>
-        <li><code>windows-setup.md</code> — VMware + Windows Server 2016 세팅</li>
-        <li><code>load-plan.md</code> — 부하 테스트 계획 및 메트릭 관측</li>
+        <li><code>overview.md</code> — 기능/스택/실습 아이디어 요약.</li>
+        <li><code>windows-setup.md</code> — VMware + Windows Server 2016 설치 및 배포 가이드.</li>
+        <li><code>load-plan.md</code> — Low/Normal/Peak 단계 정의, 메트릭 관측 포인트, 로드툴 예시.</li>
       </ul>
 
-      <h2>빌드/실행</h2>
-      <pre><code>npm install
-npm run build
-npm start</code></pre>
-      <p class="sub">개발 모드: <code>npm run dev</code> (ts-node + 클라이언트 watch)</p>
+      <h2>실습 체크리스트</h2>
+      <ul class="doc-list">
+        <li>1) 서버 실행 후 <code>/api/metrics</code> 응답이 갱신되는지 확인.</li>
+        <li>2) 페이지에서 닉네임 저장 → 리더보드에 기록되는지 확인.</li>
+        <li>3) Low → Normal → Peak 버튼 클릭 시 지표 변화와 경고 배너 확인.</li>
+        <li>4) k6/AB/JMeter로 부하를 주며 PerfMon/Task Manager를 병행 관찰.</li>
+        <li>5) GitHub 코드 열람 후, 스스로 엔드포인트/차트/리더보드 로직을 변경해보기.</li>
+      </ul>
+
+      <h2>추천 학습 주제</h2>
+      <ul class="doc-list">
+        <li>RPS와 Latency의 상관관계, 오류율이 1%→5%로 증가할 때 사용자 경험이 어떻게 달라지는지.</li>
+        <li>Peak 상황에서 CPU/메모리 포화가 응답 지연에 미치는 영향.</li>
+        <li>로드툴(k6/AB/JMeter)별 장단점과 시나리오 설계 방법.</li>
+        <li>IIS 역프록시 vs 순수 Node.js 호스팅의 차이.</li>
+      </ul>
     </div>
   </body>
 </html>
