@@ -11,7 +11,6 @@ const clientDir = path.join(process.cwd(), 'src/client');
 let currentLoad: LoadLevel = 'low';
 
 interface LeaderboardEntry {
-  ip: string;
   name: string;
   peakRps: number;
   bestLatency: number;
@@ -26,23 +25,14 @@ const leaderboard = new Map<string, LeaderboardEntry>();
 
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
-function getClientIp(req: express.Request) {
-  const forwarded = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
-  const ip = forwarded || req.ip || '';
-  return ip.replace(/^::ffff:/, '') || 'unknown';
-}
+const DEFAULT_NAME = 'Guest';
 
-function makeDefaultName(ip: string) {
-  const tail = ip.split('.').pop() ?? 'xx';
-  return `Student-${tail.padStart(2, '0')}`;
-}
-
-function ensureEntry(ip: string): LeaderboardEntry {
-  const existing = leaderboard.get(ip);
+function ensureEntry(name: string): LeaderboardEntry {
+  const key = name || DEFAULT_NAME;
+  const existing = leaderboard.get(key);
   if (existing) return existing;
   const fresh: LeaderboardEntry = {
-    ip,
-    name: makeDefaultName(ip),
+    name: key,
     peakRps: 0,
     bestLatency: Number.MAX_SAFE_INTEGER,
     bestErrorRate: Number.MAX_SAFE_INTEGER,
@@ -51,7 +41,7 @@ function ensureEntry(ip: string): LeaderboardEntry {
     level: currentLoad,
     updatedAt: Date.now()
   };
-  leaderboard.set(ip, fresh);
+  leaderboard.set(key, fresh);
   return fresh;
 }
 
@@ -66,8 +56,8 @@ function computeStability(snapshot: MetricSnapshot) {
   return clamp(Math.round(100 - penalty), 0, 100);
 }
 
-function updateLeaderboard(ip: string, snapshot: MetricSnapshot) {
-  const entry = ensureEntry(ip);
+function updateLeaderboard(name: string, snapshot: MetricSnapshot) {
+  const entry = ensureEntry(name);
   entry.peakRps = Math.max(entry.peakRps, snapshot.rps);
   entry.bestLatency = Math.min(entry.bestLatency, snapshot.responseTimeMs);
   entry.bestErrorRate = Math.min(entry.bestErrorRate, snapshot.errorRate);
@@ -75,8 +65,14 @@ function updateLeaderboard(ip: string, snapshot: MetricSnapshot) {
   entry.stabilityScore = Math.max(entry.stabilityScore, computeStability(snapshot));
   entry.level = snapshot.level;
   entry.updatedAt = snapshot.timestamp;
-  leaderboard.set(ip, entry);
+  leaderboard.set(entry.name, entry);
   return entry;
+}
+
+function extractName(req: express.Request) {
+  const candidate = (req.query.name || req.headers['x-user-name'] || '').toString().trim();
+  if (candidate.length >= 2) return candidate.slice(0, 32);
+  return DEFAULT_NAME;
 }
 
 app.use(cors());
@@ -95,14 +91,11 @@ app.use((req, res, next) => {
 app.use(express.static(publicDir));
 app.use(express.static(clientDir));
 
-app.get('/api/identity', (req, res) => {
-  const ip = getClientIp(req);
-  const entry = ensureEntry(ip);
-  res.json({ ip: entry.ip, name: entry.name });
+app.get('/api/identity', (_req, res) => {
+  res.json({ name: DEFAULT_NAME });
 });
 
 app.post('/api/identity', (req, res) => {
-  const ip = getClientIp(req);
   try {
     const rawName = (req.body?.name ?? '').toString().trim();
     if (!rawName || rawName.length < 2) {
@@ -111,10 +104,9 @@ app.post('/api/identity', (req, res) => {
         .json({ error: '닉네임은 최소 2자 이상이어야 합니다. (Name must be at least 2 characters.)' });
     }
     const name = rawName.slice(0, 32);
-    const entry = ensureEntry(ip);
-    entry.name = name;
+    const entry = ensureEntry(name);
     entry.updatedAt = Date.now();
-    leaderboard.set(ip, entry);
+    leaderboard.set(entry.name, entry);
     res.json({ ok: true, entry });
   } catch (err) {
     console.error('identity error', err);
@@ -133,7 +125,8 @@ app.get('/api/leaderboard', (_req, res) => {
 
 app.get('/api/metrics', async (req, res) => {
   const snapshot = await collectMetrics(currentLoad);
-  updateLeaderboard(getClientIp(req), snapshot);
+  const name = extractName(req);
+  updateLeaderboard(name, snapshot);
   res.json(snapshot);
 });
 

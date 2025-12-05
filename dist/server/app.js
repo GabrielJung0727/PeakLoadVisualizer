@@ -14,24 +14,14 @@ const clientDir = path_1.default.join(process.cwd(), 'src/client');
 let currentLoad = 'low';
 const leaderboard = new Map();
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
-function getClientIp(req) {
-    var _a, _b;
-    const forwarded = (_b = (_a = req.headers['x-forwarded-for']) === null || _a === void 0 ? void 0 : _a.split(',')[0]) === null || _b === void 0 ? void 0 : _b.trim();
-    const ip = forwarded || req.ip || '';
-    return ip.replace(/^::ffff:/, '') || 'unknown';
-}
-function makeDefaultName(ip) {
-    var _a;
-    const tail = (_a = ip.split('.').pop()) !== null && _a !== void 0 ? _a : 'xx';
-    return `Student-${tail.padStart(2, '0')}`;
-}
-function ensureEntry(ip) {
-    const existing = leaderboard.get(ip);
+const DEFAULT_NAME = 'Guest';
+function ensureEntry(name) {
+    const key = name || DEFAULT_NAME;
+    const existing = leaderboard.get(key);
     if (existing)
         return existing;
     const fresh = {
-        ip,
-        name: makeDefaultName(ip),
+        name: key,
         peakRps: 0,
         bestLatency: Number.MAX_SAFE_INTEGER,
         bestErrorRate: Number.MAX_SAFE_INTEGER,
@@ -40,7 +30,7 @@ function ensureEntry(ip) {
         level: currentLoad,
         updatedAt: Date.now()
     };
-    leaderboard.set(ip, fresh);
+    leaderboard.set(key, fresh);
     return fresh;
 }
 function computeServerState(snapshot) {
@@ -54,8 +44,8 @@ function computeStability(snapshot) {
     const penalty = snapshot.errorRate * 10 + Math.max(snapshot.responseTimeMs - 120, 0) / 6 + Math.max(snapshot.cpu - 75, 0) / 2.5;
     return clamp(Math.round(100 - penalty), 0, 100);
 }
-function updateLeaderboard(ip, snapshot) {
-    const entry = ensureEntry(ip);
+function updateLeaderboard(name, snapshot) {
+    const entry = ensureEntry(name);
     entry.peakRps = Math.max(entry.peakRps, snapshot.rps);
     entry.bestLatency = Math.min(entry.bestLatency, snapshot.responseTimeMs);
     entry.bestErrorRate = Math.min(entry.bestErrorRate, snapshot.errorRate);
@@ -63,8 +53,14 @@ function updateLeaderboard(ip, snapshot) {
     entry.stabilityScore = Math.max(entry.stabilityScore, computeStability(snapshot));
     entry.level = snapshot.level;
     entry.updatedAt = snapshot.timestamp;
-    leaderboard.set(ip, entry);
+    leaderboard.set(entry.name, entry);
     return entry;
+}
+function extractName(req) {
+    const candidate = (req.query.name || req.headers['x-user-name'] || '').toString().trim();
+    if (candidate.length >= 2)
+        return candidate.slice(0, 32);
+    return DEFAULT_NAME;
 }
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -82,14 +78,11 @@ app.use((req, res, next) => {
 });
 app.use(express_1.default.static(publicDir));
 app.use(express_1.default.static(clientDir));
-app.get('/api/identity', (req, res) => {
-    const ip = getClientIp(req);
-    const entry = ensureEntry(ip);
-    res.json({ ip: entry.ip, name: entry.name });
+app.get('/api/identity', (_req, res) => {
+    res.json({ name: DEFAULT_NAME });
 });
 app.post('/api/identity', (req, res) => {
     var _a, _b;
-    const ip = getClientIp(req);
     try {
         const rawName = ((_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : '').toString().trim();
         if (!rawName || rawName.length < 2) {
@@ -98,10 +91,9 @@ app.post('/api/identity', (req, res) => {
                 .json({ error: '닉네임은 최소 2자 이상이어야 합니다. (Name must be at least 2 characters.)' });
         }
         const name = rawName.slice(0, 32);
-        const entry = ensureEntry(ip);
-        entry.name = name;
+        const entry = ensureEntry(name);
         entry.updatedAt = Date.now();
-        leaderboard.set(ip, entry);
+        leaderboard.set(entry.name, entry);
         res.json({ ok: true, entry });
     }
     catch (err) {
@@ -121,7 +113,8 @@ app.get('/api/leaderboard', (_req, res) => {
 });
 app.get('/api/metrics', async (req, res) => {
     const snapshot = await (0, metrics_1.collectMetrics)(currentLoad);
-    updateLeaderboard(getClientIp(req), snapshot);
+    const name = extractName(req);
+    updateLeaderboard(name, snapshot);
     res.json(snapshot);
 });
 app.post('/api/load/:level', (req, res) => {

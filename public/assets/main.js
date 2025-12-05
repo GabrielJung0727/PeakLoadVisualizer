@@ -9,10 +9,10 @@ const translations = {
         heroNote: 'IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능',
         highlightTitle: 'Peak 대비 상태',
         highlightSub: 'RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.',
-        identityTitle: '닉네임 설정 (IP 기준)',
-        identitySub: '실습자가 접속하면 자신의 IP에 매핑된 닉네임을 설정하고, 부하 테스트 결과가 리더보드에 기록됩니다. 프라이버시를 위해 기본값은 익명 닉네임으로 시작합니다.',
+        identityTitle: '닉네임 설정 (일시적)',
+        identitySub: '현재 세션에서 사용할 닉네임을 설정하면 리더보드에 기록됩니다. IP나 계정 연동 없이, 로컬에만 임시 저장됩니다.',
         identityLegendTitle: '기록 방식',
-        identityLegend1: 'IP별 15초 이동창으로 RPS/지연/오류율 계산',
+        identityLegend1: '최근 15초 이동창으로 RPS/지연/오류율 계산',
         identityLegend2: 'CPU/메모리 실측(systeminformation) 반영',
         identityLegend3: '최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장',
         stepsTitle: '단계별 부하 실습',
@@ -33,10 +33,7 @@ const translations = {
         leaderboardError: '리더보드를 불러올 수 없습니다.',
         leaderboardEmpty: '데이터 수집 대기 중...',
         namePlaceholder: '예: StudentA',
-        nameLoaded: (name) => `현재 닉네임: ${name}`,
         nameSaved: (name) => `저장됨: ${name}`,
-        nameLoadError: '닉네임을 불러올 수 없습니다.',
-        nameSaveError: '저장 실패: 입력을 확인해주세요.',
         nameTooShort: '2자 이상 입력하세요.',
         loadSwitchError: '부하 단계 전환 실패',
         tagLive: '실시간'
@@ -50,10 +47,10 @@ const translations = {
         heroNote: 'Works with IIS or Node.js (Express) + k6/AB/JMeter',
         highlightTitle: 'Peak Readiness',
         highlightSub: 'Polling RPS, latency, and error rate in real time.',
-        identityTitle: 'Nickname (per IP)',
-        identitySub: 'Set a nickname tied to your IP so your load-test results land on the leaderboard. Starts with an anonymous default for privacy.',
+        identityTitle: 'Nickname (temp, local)',
+        identitySub: 'Set a temporary nickname for this session; results on the leaderboard will use it. No IP/account is stored—kept in your browser only.',
         identityLegendTitle: 'How it records',
-        identityLegend1: '15s sliding window per IP for RPS/latency/error rate',
+        identityLegend1: '15s sliding window for RPS/latency/error rate',
         identityLegend2: 'CPU/memory from systeminformation (OS metrics)',
         identityLegend3: 'Stores peak RPS, lowest avg latency, lowest error rate, stability score',
         stepsTitle: 'Load Lab Steps',
@@ -74,10 +71,7 @@ const translations = {
         leaderboardError: 'Unable to load leaderboard.',
         leaderboardEmpty: 'Waiting for data...',
         namePlaceholder: 'e.g., StudentA',
-        nameLoaded: (name) => `Current nickname: ${name}`,
         nameSaved: (name) => `Saved: ${name}`,
-        nameLoadError: 'Failed to load nickname.',
-        nameSaveError: 'Save failed: check your input.',
         nameTooShort: 'Enter at least 2 characters.',
         loadSwitchError: 'Failed to change load level',
         tagLive: 'Live'
@@ -116,7 +110,8 @@ const els = {
 const state = {
     level: 'low',
     leaderboard: [],
-    lang: localStorage.getItem('lang') === 'en' ? 'en' : 'ko'
+    lang: localStorage.getItem('lang') === 'en' ? 'en' : 'ko',
+    name: localStorage.getItem('nickname') || 'Guest'
 };
 const dict = () => translations[state.lang];
 function setText(id, value) {
@@ -337,7 +332,7 @@ function formatLabel(timestamp) {
 }
 async function refreshMetrics() {
     try {
-        const res = await fetch('/api/metrics');
+        const res = await fetch(`/api/metrics?name=${encodeURIComponent(state.name || 'Guest')}`);
         if (!res.ok)
             throw new Error('metrics fetch failed');
         const snapshot = (await res.json());
@@ -374,44 +369,6 @@ function setNameStatus(message, tone = 'muted') {
     els.identity.status.textContent = message;
     const color = tone === 'error' ? '#ff9f9f' : tone === 'ok' ? '#5dd5c4' : getComputedStyle(document.body).getPropertyValue('--muted');
     els.identity.status.style.color = color;
-}
-async function fetchIdentity() {
-    if (!els.identity.input)
-        return;
-    try {
-        const res = await fetch('/api/identity');
-        if (!res.ok)
-            throw new Error('identity fetch failed');
-        const data = (await res.json());
-        state.identity = data;
-        els.identity.input.value = data.name;
-        setNameStatus(dict().nameLoaded(data.name), 'ok');
-    }
-    catch (err) {
-        console.error(err);
-        setNameStatus(dict().nameLoadError, 'error');
-    }
-}
-async function saveIdentity(name) {
-    try {
-        const res = await fetch('/api/identity', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
-        });
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(text || '닉네임 저장 실패');
-        }
-        const data = await res.json();
-        state.identity = data.entry;
-        setNameStatus(dict().nameSaved(data.entry.name), 'ok');
-    }
-    catch (err) {
-        console.error(err);
-        const message = err instanceof Error ? err.message : dict().nameSaveError;
-        setNameStatus(message || dict().nameSaveError, 'error');
-    }
 }
 function renderLeaderboard(entries) {
     if (!els.leaderboardBody)
@@ -459,6 +416,8 @@ async function refreshLeaderboard() {
 function bindIdentityForm() {
     if (!els.identity.form || !els.identity.input)
         return;
+    els.identity.input.value = state.name;
+    setNameStatus(dict().nameSaved(state.name), 'ok');
     els.identity.form.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = els.identity.input.value.trim();
@@ -466,7 +425,9 @@ function bindIdentityForm() {
             setNameStatus(dict().nameTooShort, 'error');
             return;
         }
-        void saveIdentity(name);
+        state.name = name.slice(0, 32);
+        localStorage.setItem('nickname', state.name);
+        setNameStatus(dict().nameSaved(state.name), 'ok');
     });
 }
 function startLeaderboardPolling() {
@@ -480,7 +441,6 @@ function init() {
     bindLanguageSwitch();
     bindIdentityForm();
     startPolling();
-    void fetchIdentity();
     startLeaderboardPolling();
 }
 window.addEventListener('DOMContentLoaded', init);

@@ -47,17 +47,18 @@ npm start           # Express 서버 실행 (public 정적 파일 서빙)
 - 실시간/주기적 폴링으로 `/api/metrics` 수집 후 Chart.js(브라우저 CDN)로 시각화
 - Low/Normal/Peak 버튼 → `/api/load/:level` 호출로 부하 단계 전환(실제 부하 도구 트리거 연결 가능)
 - 응답 지연/오류율 상승 시 경고 배너 출력
-- IP별 닉네임 설정 후 리더보드(최고 RPS, 최저 평균 지연, 오류율, 안정성 점수)로 실습자 경쟁
+- 브라우저 로컬에 임시 닉네임을 저장해 리더보드(최고 RPS, 최저 평균 지연, 오류율, 안정성 점수)로 실습자 경쟁
 
 ## 서버 데모 개요
 - Express 정적 파일 서빙 + `/api/metrics`(실시간 지표) + `/api/load/:level`
 - 요청마다 응답 시간/오류 여부를 기록하여 RPS·지연·오류율을 계산, CPU/메모리는 OS 실측(`systeminformation`)
+- `/api/metrics` 호출 시 전달된 닉네임(쿼리/헤더)으로 리더보드 기록 업데이트
 - 실제 부하 도구(k6/AB/JMeter)와 연동 시 `/api/metrics`에 실측 데이터 주입 가능하도록 확장
 
 ## API 개요
-- `GET /api/metrics` : 실시간 메트릭 반환, 요청 보낸 IP의 리더보드 점수 업데이트
+- `GET /api/metrics` : 실시간 메트릭 반환, 요청에 포함된 닉네임(`?name=` 또는 `x-user-name`)으로 리더보드 업데이트
 - `POST /api/load/:level` : 부하 단계 전환 (low|normal|peak)
-- `GET /api/identity` / `POST /api/identity` : IP별 닉네임 조회/저장
+- `GET /api/identity` / `POST /api/identity` : 임시 닉네임 기본값 반환 / 유효성 체크
 - `GET /api/leaderboard` : 최고 기록(peak RPS/지연/오류율/안정성) 상위 50명 조회
 
 ## 모니터링/실습 아이디어

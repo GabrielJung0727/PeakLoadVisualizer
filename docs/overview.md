@@ -10,7 +10,7 @@
 - 요청 종료 시 응답 시간/오류 여부 기록 → 이동 평균 RPS/지연/오류율 계산, CPU·메모리는 OS 실측(`systeminformation`)
 - `/api/load/:level`: Low/Normal/Peak 단계 전환 및 UI 반영
 - 정적 페이지(`src/client/index.html`): 실시간 그래프, 경고 배너, 단계 전환 버튼
-- 리더보드: IP별 닉네임 설정 후 최고 RPS/최저 지연/오류율/안정성 점수로 순위 노출
+- 리더보드: 브라우저에 임시 저장된 닉네임을 전송해 최고 RPS/최저 지연/오류율/안정성 점수로 순위 노출
 
 ## 기술 스택 제안
 - 서버: Node.js + Express (TS)
