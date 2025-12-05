@@ -26,7 +26,14 @@
     </nav>
     <header class="hero">
       <div class="hero__text">
-        <p class="eyebrow">Windows Server 2016 · VMware · TS</p>
+        <p class="eyebrow">
+          Windows Server 2016
+          <span class="help-wrap"><button class="help" data-help-key="windows">?</button><span class="help-tooltip"></span></span>
+          · VMware
+          <span class="help-wrap"><button class="help" data-help-key="vmware">?</button><span class="help-tooltip"></span></span>
+          · TS
+          <span class="help-wrap"><button class="help" data-help-key="ts">?</button><span class="help-tooltip"></span></span>
+        </p>
         <h1 id="hero-title">동적 부하 처리 웹서비스 &amp; Peak 성능 분석</h1>
         <p class="lede" id="hero-lede">
           요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드.
@@ -37,21 +44,33 @@
           <button class="pill" data-level="normal">Normal 부하</button>
           <button class="pill" data-level="peak">Peak 부하</button>
         </div>
-        <p class="note" id="hero-note">IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능</p>
+        <p class="note" id="hero-note">
+          IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능
+          <span class="help-wrap"><button class="help" data-help-key="webserver">?</button><span class="help-tooltip"></span></span>
+        </p>
       </div>
       <div class="hero__panel">
         <div class="status-chip" id="stage-chip">현재 단계: Low</div>
         <div class="highlight">
-          <h3 id="highlight-title">Peak 대비 상태</h3>
+          <h3 id="highlight-title">
+            Peak 대비 상태
+            <span class="help-wrap"><button class="help" data-help-key="scalability">?</button><span class="help-tooltip"></span></span>
+          </h3>
           <p class="highlight__value" id="rps-highlight">-- req/s</p>
           <p class="sub" id="highlight-sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
           <div class="mini-grid">
             <div>
-              <p class="label">CPU</p>
+              <p class="label">
+                CPU
+                <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
+              </p>
               <p class="metric" id="cpu-highlight">--%</p>
             </div>
             <div>
-              <p class="label">메모리</p>
+              <p class="label">
+                메모리
+                <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
+              </p>
               <p class="metric" id="memory-highlight">-- MB</p>
             </div>
           </div>
@@ -64,23 +83,38 @@
 
       <section class="grid">
         <article class="card">
-          <p class="label">RPS</p>
+          <p class="label">
+            RPS
+            <span class="help-wrap"><button class="help" data-help-key="rps">?</button><span class="help-tooltip"></span></span>
+          </p>
           <p class="value" id="card-rps">-- req/s</p>
         </article>
         <article class="card">
-          <p class="label">응답 시간</p>
+          <p class="label">
+            응답 시간
+            <span class="help-wrap"><button class="help" data-help-key="latency">?</button><span class="help-tooltip"></span></span>
+          </p>
           <p class="value" id="card-latency">-- ms</p>
         </article>
         <article class="card">
-          <p class="label">CPU</p>
+          <p class="label">
+            CPU
+            <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
+          </p>
           <p class="value" id="card-cpu">--%</p>
         </article>
         <article class="card">
-          <p class="label">메모리</p>
+          <p class="label">
+            메모리
+            <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
+          </p>
           <p class="value" id="card-memory">-- MB</p>
         </article>
         <article class="card">
-          <p class="label">오류율</p>
+          <p class="label">
+            오류율
+            <span class="help-wrap"><button class="help" data-help-key="errorRate">?</button><span class="help-tooltip"></span></span>
+          </p>
           <p class="value" id="card-error">--%</p>
         </article>
         <article class="card">
@@ -94,6 +128,7 @@
           <h3 id="identity-title">닉네임 설정 (일시적)</h3>
           <p class="sub" id="identity-sub">
             세션 동안 사용할 닉네임을 정하면 리더보드에 기록됩니다. IP/계정 저장 없이 브라우저에만 임시 보관합니다.
+            <span class="help-wrap"><button class="help" data-help-key="webclient">?</button><span class="help-tooltip"></span></span>
           </p>
           <form id="name-form" class="name-form">
             <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
@@ -118,7 +153,10 @@
               <p class="label">요청량 &amp; 응답 시간</p>
               <h3>RPS vs Response</h3>
             </div>
-            <p class="tag" id="tag-live">실시간</p>
+            <p class="tag" id="tag-live">
+              실시간
+              <span class="help-wrap"><button class="help" data-help-key="dashboard">?</button><span class="help-tooltip"></span></span>
+            </p>
           </div>
           <canvas id="rpsChart" height="130"></canvas>
         </div>
@@ -128,7 +166,10 @@
               <p class="label">CPU &amp; 메모리</p>
               <h3>리소스 사용률</h3>
             </div>
-            <p class="tag">Performance Monitor 대응</p>
+            <p class="tag">
+              Performance Monitor 대응
+              <span class="help-wrap"><button class="help" data-help-key="perfmon">?</button><span class="help-tooltip"></span></span>
+            </p>
           </div>
           <canvas id="resourceChart" height="130"></canvas>
         </div>
@@ -136,7 +177,10 @@
 
       <section class="panel" id="steps">
         <div>
-          <h3 id="steps-title">단계별 부하 실습</h3>
+          <h3 id="steps-title">
+            단계별 부하 실습
+            <span class="help-wrap"><button class="help" data-help-key="loadtest">?</button><span class="help-tooltip"></span></span>
+          </h3>
           <p class="sub" id="steps-sub">
             버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다.
             실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.
@@ -144,15 +188,30 @@
           <ul class="steps">
             <li id="step-low">Low: 캐시 워밍업, 정상 지표 확인</li>
             <li id="step-normal">Normal: 평균 응답 시간과 CPU 안정성 확인</li>
-            <li id="step-peak">Peak: 지연/오류율 상승 시 경고 배너 확인</li>
+            <li id="step-peak">
+              Peak: 지연/오류율 상승 시 경고 배너 확인
+              <span class="help-wrap"><button class="help" data-help-key="peak">?</button><span class="help-tooltip"></span></span>
+            </li>
           </ul>
         </div>
         <div class="legend">
-          <p class="legend__title" id="monitor-title">모니터링 포인트</p>
+          <p class="legend__title" id="monitor-title">
+            모니터링 포인트
+            <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
+          </p>
           <ul>
-            <li id="monitor-1">Performance Monitor: % Processor Time, Available MBytes</li>
-            <li id="monitor-2">로드툴: k6/AB/JMeter 결과와 그래프 비교</li>
-            <li id="monitor-3">Task Manager 캡처로 실시간 리소스 공유</li>
+            <li id="monitor-1">
+              Performance Monitor: % Processor Time, Available MBytes
+              <span class="help-wrap"><button class="help" data-help-key="perfmon">?</button><span class="help-tooltip"></span></span>
+            </li>
+            <li id="monitor-2">
+              로드툴: k6/AB/JMeter 결과와 그래프 비교
+              <span class="help-wrap"><button class="help" data-help-key="loadtest">?</button><span class="help-tooltip"></span></span>
+            </li>
+            <li id="monitor-3">
+              Task Manager 캡처로 실시간 리소스 공유
+              <span class="help-wrap"><button class="help" data-help-key="taskmgr">?</button><span class="help-tooltip"></span></span>
+            </li>
           </ul>
         </div>
       </section>
@@ -160,7 +219,10 @@
       <section class="panel leaderboard" id="leaderboard">
         <div class="leaderboard__head">
           <div>
-            <p class="label" id="leaderboard-label">Leaderboard</p>
+            <p class="label" id="leaderboard-label">
+              Leaderboard
+              <span class="help-wrap"><button class="help" data-help-key="leaderboard">?</button><span class="help-tooltip"></span></span>
+            </p>
             <h3 id="leaderboard-title">실시간 성능 순위</h3>
             <p class="sub" id="leaderboard-sub">최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.</p>
           </div>

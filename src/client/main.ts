@@ -147,6 +147,27 @@ const translations: Record<Lang, Translations> = {
   }
 };
 
+const helpTexts: Record<string, string> = {
+  windows: 'Windows Server 2016: 프로젝트 서버 OS이자 부하 테스트가 진행되는 환경 (VMware 위에 구동).',
+  vmware: 'VMware: Windows Server 2016을 가상 머신으로 실행하는 가상화 플랫폼.',
+  ts: 'TypeScript (TS): JavaScript 기반, 정적 타입 지원 언어로 클라이언트·서버 개발에 사용.',
+  webserver: 'Web Server (IIS/Node.js): 클라이언트 요청을 받아 처리하는 서버 런타임.',
+  rps: 'RPS (Requests Per Second): 1초 동안 처리한 요청 수, 성능 핵심 지표.',
+  latency: 'Latency: 요청부터 응답 도착까지 걸린 시간.',
+  cpu: 'CPU Usage: 서버 연산 자원 사용률.',
+  memory: 'Memory Usage: 서비스가 소비하는 RAM 용량.',
+  errorRate: 'Error Rate: 전체 요청 대비 실패 비율.',
+  loadtest: 'Load Test: 인위적 부하로 성능/안정성을 검증하는 테스트.',
+  peak: 'Peak Load/Performance: 서버가 감당할 수 있는 최대 부하 한계.',
+  dashboard: 'Dashboard: RPS/CPU/메모리 등 지표를 실시간 시각화하는 화면.',
+  leaderboard: 'Leaderboard: 부하 테스트 결과(피크 RPS, 지연, 오류율, 안정성)를 비교·순위화.',
+  perfmon: 'Performance Monitor: Windows 자원 추적 도구(Processor Time, Memory 등).',
+  taskmgr: 'Task Manager: CPU/메모리 변화를 UI로 확인하는 도구.',
+  scalability: 'Scalability: 더 많은 부하를 처리하도록 확장 가능한 능력.',
+  stability: 'Stability: 최대 부하 상황에서도 서비스가 정상 작동하는 능력.',
+  webclient: 'Web Client: 실습자가 접속해 부하를 조작하는 브라우저 환경.'
+};
+
 declare const Chart: any;
 
 type ChartSet = {
@@ -207,6 +228,27 @@ const dict = () => translations[state.lang];
 function setText(id: string, value: string) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function setupHelpTips() {
+  const wraps = Array.from(document.querySelectorAll<HTMLElement>('.help-wrap'));
+  wraps.forEach((wrap) => {
+    const btn = wrap.querySelector<HTMLButtonElement>('.help');
+    const tooltip = wrap.querySelector<HTMLElement>('.help-tooltip');
+    const key = btn?.dataset.helpKey || '';
+    if (!btn || !tooltip) return;
+    tooltip.textContent = helpTexts[key] || '설명 없음 / No description';
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      wraps.forEach((w) => w.classList.remove('open'));
+      wrap.classList.toggle('open');
+    });
+  });
+
+  document.addEventListener('click', () => {
+    wraps.forEach((wrap) => wrap.classList.remove('open'));
+  });
 }
 
 function applyLanguage(lang: Lang) {
@@ -544,6 +586,7 @@ function startLeaderboardPolling() {
 
 function init() {
   applyLanguage(state.lang);
+  setupHelpTips();
   state.charts = setupCharts();
   bindControls();
   bindLanguageSwitch();
