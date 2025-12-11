@@ -8,6 +8,7 @@ exports.collectMetrics = collectMetrics;
 const systeminformation_1 = __importDefault(require("systeminformation"));
 const WINDOW_MS = 15000;
 const samples = [];
+let lastDiskSample;
 function cleanupWindow() {
     const cutoff = Date.now() - WINDOW_MS;
     while (samples.length && samples[0].ts < cutoff) {
@@ -34,12 +35,35 @@ function aggregateRequests() {
     const errorRate = total ? (errors / total) * 100 : 0;
     return { rps, responseTimeMs, errorRate, timestamp: Date.now() };
 }
+async function getDiskDelta() {
+    const io = await systeminformation_1.default.disksIO();
+    const now = Date.now();
+    if (!lastDiskSample) {
+        lastDiskSample = { ts: now, readBytes: io.rIO, writeBytes: io.wIO };
+        return { readMBps: 0, writeMBps: 0 };
+    }
+    const elapsedSec = Math.max((now - lastDiskSample.ts) / 1000, 0.001);
+    const readMBps = Math.max((io.rIO - lastDiskSample.readBytes) / 1024 / 1024 / elapsedSec, 0);
+    const writeMBps = Math.max((io.wIO - lastDiskSample.writeBytes) / 1024 / 1024 / elapsedSec, 0);
+    lastDiskSample = { ts: now, readBytes: io.rIO, writeBytes: io.wIO };
+    return { readMBps, writeMBps };
+}
 async function getSystemStats() {
-    const [load, mem] = await Promise.all([systeminformation_1.default.currentLoad(), systeminformation_1.default.mem()]);
+    var _a, _b;
+    const [load, mem, disk] = await Promise.all([systeminformation_1.default.currentLoad(), systeminformation_1.default.mem(), getDiskDelta()]);
     const cpu = Number(load.currentLoad.toFixed(1));
     const usedBytes = mem.active || mem.used || mem.total - mem.available;
     const memoryMb = Math.round(usedBytes / 1024 / 1024);
-    return { cpu, memoryMb };
+    const memoryTotalMb = Math.round(mem.total / 1024 / 1024);
+    const memoryFreeMb = Math.round(((_b = (_a = mem.available) !== null && _a !== void 0 ? _a : mem.free) !== null && _b !== void 0 ? _b : mem.total - usedBytes) / 1024 / 1024);
+    return {
+        cpu,
+        memoryMb,
+        memoryTotalMb,
+        memoryFreeMb,
+        diskReadMBps: Number(disk.readMBps.toFixed(2)),
+        diskWriteMBps: Number(disk.writeMBps.toFixed(2))
+    };
 }
 function buildWarning(snapshot) {
     const flags = [];
@@ -51,10 +75,12 @@ function buildWarning(snapshot) {
         flags.push('CPU 포화 / CPU saturation');
     return flags.length ? flags.join(' · ') : undefined;
 }
-async function collectMetrics(level) {
+async function collectMetrics(level, profile) {
     const { rps, responseTimeMs, errorRate, timestamp } = aggregateRequests();
-    const { cpu, memoryMb } = await getSystemStats();
+    const { cpu, memoryMb, memoryTotalMb, memoryFreeMb, diskReadMBps, diskWriteMBps } = await getSystemStats();
     const warning = buildWarning({ responseTimeMs, errorRate, cpu });
+    const memoryCapacityMb = memoryTotalMb || Number(process.env.SERVER_MEMORY_MB) || 0;
+    const headroom = memoryCapacityMb ? Math.max(memoryCapacityMb - memoryMb, 0) : undefined;
     return {
         level,
         rps: Math.round(rps * 10) / 10,
@@ -63,6 +89,13 @@ async function collectMetrics(level) {
         responseTimeMs: Math.round(responseTimeMs),
         errorRate: Math.round(errorRate * 10) / 10,
         timestamp,
-        warning
+        warning,
+        memoryHeadroomMb: headroom,
+        memoryCapacityMb: memoryCapacityMb || memoryTotalMb,
+        memoryTotalMb,
+        memoryFreeMb,
+        diskReadMBps,
+        diskWriteMBps,
+        profile
     };
 }

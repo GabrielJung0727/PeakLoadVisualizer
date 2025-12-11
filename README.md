@@ -61,6 +61,11 @@ npm start           # Express 서버 실행 (public 정적 파일 서빙)
 - `GET /api/identity` / `POST /api/identity` : 임시 닉네임 기본값 반환 / 유효성 체크
 - `GET /api/leaderboard` : 최고 기록(peak RPS/지연/오류율/안정성) 상위 50명 조회
 
+## Windows Server 2016 부하 프로필 (2GB RAM / 120GB Disk)
+- `Low` → `Normal` → `Peak` → `Overload` 4단계. Windows Server 2016 VM(메모리 2GB, 디스크 120GB) 기준으로 튜닝.
+- 각 단계마다 CPU 워커(Worker Threads)로 실제 연산 부하, 64~256MB 메모리 압박, temp 파일 IO 버스트를 발생시켜 Task Manager/PerfMon에서 즉시 체감.
+- `/api/metrics` 응답에 현재 프로필(목표 RPS, 지연 범위, 오류율, CPU 워커 수, 메모리 압박량)이 포함되어 UI에 표시됩니다.
+
 ## 모니터링/실습 아이디어
 - Windows Performance Monitor/Task Manager를 화면 공유하여 서버 리소스 추적
 - 로드 테스트 도구를 원격 쉘이나 CI Job으로 실행해 실습자 요청 트리거

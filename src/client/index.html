@@ -43,6 +43,7 @@
           <button class="pill active" data-level="low">Low 부하</button>
           <button class="pill" data-level="normal">Normal 부하</button>
           <button class="pill" data-level="peak">Peak 부하</button>
+          <button class="pill pill--alert" data-level="overload">Overload</button>
         </div>
         <p class="note" id="hero-note">
           IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능
@@ -80,6 +81,29 @@
 
     <main class="content" id="dashboard">
       <section class="warning" id="warning" hidden>Peak 단계 경고: 응답 지연/오류 발생</section>
+
+      <section class="panel panel--spec" id="spec">
+        <div>
+          <h3 id="spec-title">Windows Server 2016 · 실시간 계측</h3>
+          <p class="sub" id="spec-sub">Task Manager/PerfMon과 동일한 CPU·메모리·디스크 IO 값을 실시간으로 보여줍니다.</p>
+          <ul class="spec-list">
+            <li id="spec-ram">RAM 실시간 사용/여유 표시.</li>
+            <li id="spec-disk">디스크 IO(R/W MB/s) 실시간 표시.</li>
+            <li id="spec-io">IIS/Express 공용, VM 내부 실측값.</li>
+          </ul>
+        </div>
+        <div class="legend">
+          <p class="legend__title" id="profile-title">실시간 시스템 상태</p>
+          <ul class="profile-list">
+            <li id="profile-cpu">CPU: --</li>
+            <li id="profile-mem">메모리: --</li>
+            <li id="profile-rps">실시간 RPS: --</li>
+            <li id="profile-latency">평균 지연: --</li>
+            <li id="profile-error">오류율: --</li>
+          </ul>
+          <p class="profile-note" id="profile-note"></p>
+        </div>
+      </section>
 
       <section class="grid">
         <article class="card">
@@ -192,6 +216,7 @@
               Peak: 지연/오류율 상승 시 경고 배너 확인
               <span class="help-wrap"><button class="help" data-help-key="peak">?</button><span class="help-tooltip"></span></span>
             </li>
+            <li id="step-overload">Overload: 의도적 포화(오류율/지연 급증)</li>
           </ul>
         </div>
         <div class="legend">

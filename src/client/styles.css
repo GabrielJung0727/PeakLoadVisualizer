@@ -204,6 +204,17 @@ body {
   border-color: transparent;
 }
 
+.pill--alert {
+  border-color: rgba(255, 99, 132, 0.5);
+}
+
+.pill--alert:hover,
+.pill--alert.active {
+  background: linear-gradient(120deg, #ff6384, #ff9f43);
+  color: #0b1226;
+  border-color: transparent;
+}
+
 .note {
   color: var(--muted);
   font-size: 14px;
@@ -367,6 +378,19 @@ body {
   margin: 0;
   padding-left: 18px;
   color: var(--muted);
+}
+
+.panel--spec .spec-list,
+.profile-list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.profile-note {
+  margin: 10px 0 0;
+  color: var(--text);
+  font-weight: 600;
 }
 
 .name-form {

@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
 const metrics_1 = require("./metrics");
+const loadManager_1 = require("./loadManager");
 const app = (0, express_1.default)();
 const port = Number(process.env.PORT) || 3000;
 const publicDir = path_1.default.join(process.cwd(), 'public');
@@ -35,9 +36,11 @@ function ensureEntry(name) {
     return fresh;
 }
 function computeServerState(snapshot) {
-    if (snapshot.errorRate >= 5)
+    if (snapshot.level === 'overload' || snapshot.errorRate >= 8 || snapshot.responseTimeMs >= 550)
+        return 'Critical';
+    if (snapshot.errorRate >= 3.5 || snapshot.responseTimeMs >= 400)
         return 'Unstable';
-    if (snapshot.errorRate >= 1.5 || snapshot.responseTimeMs >= 400)
+    if (snapshot.errorRate >= 1.5 || snapshot.responseTimeMs >= 320)
         return 'Minor Errors';
     return 'Stable';
 }
@@ -113,19 +116,20 @@ app.get('/api/leaderboard', (_req, res) => {
     res.json({ entries: entries.slice(0, 50) });
 });
 app.get('/api/metrics', async (req, res) => {
-    const snapshot = await (0, metrics_1.collectMetrics)(currentLoad);
+    const snapshot = await (0, metrics_1.collectMetrics)(currentLoad, loadManager_1.loadManager.getProfile());
     const name = extractName(req);
     updateLeaderboard(name, snapshot);
     res.json(snapshot);
 });
 app.post('/api/load/:level', (req, res) => {
     const level = req.params.level;
-    const allowed = ['low', 'normal', 'peak'];
+    const allowed = ['low', 'normal', 'peak', 'overload'];
     if (!allowed.includes(level)) {
         return res.status(400).json({ error: 'Invalid load level', allowed });
     }
     currentLoad = level;
-    res.json({ level: currentLoad });
+    loadManager_1.loadManager.setLevel(level);
+    res.json({ level: currentLoad, profile: loadManager_1.loadManager.getProfile() });
 });
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });

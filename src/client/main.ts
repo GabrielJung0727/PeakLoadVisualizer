@@ -1,4 +1,4 @@
-type LoadLevel = 'low' | 'normal' | 'peak';
+type LoadLevel = 'low' | 'normal' | 'peak' | 'overload';
 type Lang = 'ko' | 'en';
 
 type MetricSnapshot = {
@@ -6,10 +6,25 @@ type MetricSnapshot = {
   rps: number;
   cpu: number;
   memoryMb: number;
+  memoryTotalMb?: number;
+  memoryFreeMb?: number;
   responseTimeMs: number;
   errorRate: number;
   timestamp: number;
   warning?: string;
+  memoryHeadroomMb?: number;
+  memoryCapacityMb?: number;
+  profile?: {
+    level: LoadLevel;
+    cpuWorkers: number;
+    busyMs: number;
+    idleMs: number;
+    memoryPressureMb: number;
+    ioBurst: boolean;
+    notes?: string;
+  };
+  diskReadMBps?: number;
+  diskWriteMBps?: number;
 };
 
 type LeaderboardEntry = {
@@ -50,6 +65,16 @@ type Translations = {
   leaderboardLabel: string;
   leaderboardTitle: string;
   leaderboardSub: string;
+  specTitle: string;
+  specSub: string;
+  specRam: string;
+  specDisk: string;
+  specIo: string;
+  profileTitle: string;
+  stepOverload: string;
+  overloadButton: string;
+  ioOn: string;
+  ioOff: string;
   warningPrefix: string;
   stagePrefix: string;
   metricsError: string;
@@ -93,6 +118,16 @@ const translations: Record<Lang, Translations> = {
     leaderboardLabel: '리더보드',
     leaderboardTitle: '실시간 성능 순위',
     leaderboardSub: '최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.',
+    specTitle: 'Windows Server 2016 · 실시간 계측',
+    specSub: 'Task Manager/PerfMon과 동일한 실시간 CPU·메모리·디스크 값을 그대로 표시합니다.',
+    specRam: '실시간 RAM 사용/여유를 계산합니다.',
+    specDisk: '실시간 디스크 IO(R/W MB/s)를 표시합니다.',
+    specIo: 'IIS/Express 공용 · temp 파일 쓰기로 IO를 발생시킵니다.',
+    profileTitle: '실시간 시스템 상태',
+    stepOverload: 'Overload: 의도적 포화(오류율/지연 급증)',
+    overloadButton: 'Overload 과부하',
+    ioOn: '켜짐',
+    ioOff: '꺼짐',
     warningPrefix: 'Peak 단계 경고: ',
     stagePrefix: '현재 단계:',
     metricsError: '메트릭을 불러올 수 없습니다. 서버 상태를 확인하세요.',
@@ -134,6 +169,16 @@ const translations: Record<Lang, Translations> = {
     leaderboardLabel: 'Leaderboard',
     leaderboardTitle: 'Live Performance Ranking',
     leaderboardSub: 'Ranked by peak RPS, lowest avg latency, error rate, and stability score.',
+    specTitle: 'Windows Server 2016 · Live readings',
+    specSub: 'Shows the exact CPU / memory / disk IO you see in Task Manager or PerfMon, live.',
+    specRam: 'Displays live RAM use/headroom (no synthetic numbers).',
+    specDisk: 'Shows live disk IO (R/W MB/s).',
+    specIo: 'Works on IIS or Express; temp writes generate IO deterministically.',
+    profileTitle: 'Live system state',
+    stepOverload: 'Overload: intentional saturation (latency/error spike)',
+    overloadButton: 'Overload',
+    ioOn: 'on',
+    ioOff: 'off',
     warningPrefix: 'Peak warning: ',
     stagePrefix: 'Current stage:',
     metricsError: 'Unable to load metrics. Check server health.',
@@ -159,6 +204,7 @@ const helpTexts: Record<string, string> = {
   errorRate: 'Error Rate: 전체 요청 대비 실패 비율.',
   loadtest: 'Load Test: 인위적 부하로 성능/안정성을 검증하는 테스트.',
   peak: 'Peak Load/Performance: 서버가 감당할 수 있는 최대 부하 한계.',
+  overload: 'Overload: 의도적으로 자원을 포화시켜 오류율/지연을 체험하는 단계.',
   dashboard: 'Dashboard: RPS/CPU/메모리 등 지표를 실시간 시각화하는 화면.',
   leaderboard: 'Leaderboard: 부하 테스트 결과(피크 RPS, 지연, 오류율, 안정성)를 비교·순위화.',
   perfmon: 'Performance Monitor: Windows 자원 추적 도구(Processor Time, Memory 등).',
@@ -177,12 +223,27 @@ type ChartSet = {
 
 const MAX_POINTS = 30;
 const levelLabels: Record<Lang, Record<LoadLevel, string>> = {
-  ko: { low: 'Low', normal: 'Normal', peak: 'Peak' },
-  en: { low: 'Low', normal: 'Normal', peak: 'Peak' }
+  ko: { low: 'Low', normal: 'Normal', peak: 'Peak', overload: 'Overload' },
+  en: { low: 'Low', normal: 'Normal', peak: 'Peak', overload: 'Overload' }
 };
 
 const els = {
   warning: document.querySelector<HTMLElement>('#warning'),
+  spec: {
+    title: document.querySelector<HTMLElement>('#spec-title'),
+    sub: document.querySelector<HTMLElement>('#spec-sub'),
+    ram: document.querySelector<HTMLElement>('#spec-ram'),
+    disk: document.querySelector<HTMLElement>('#spec-disk'),
+    io: document.querySelector<HTMLElement>('#spec-io')
+  },
+  profile: {
+    cpu: document.querySelector<HTMLElement>('#profile-cpu'),
+    mem: document.querySelector<HTMLElement>('#profile-mem'),
+    rps: document.querySelector<HTMLElement>('#profile-rps'),
+    latency: document.querySelector<HTMLElement>('#profile-latency'),
+    error: document.querySelector<HTMLElement>('#profile-error'),
+    note: document.querySelector<HTMLElement>('#profile-note')
+  },
   cards: {
     rps: document.querySelector<HTMLElement>('#card-rps'),
     latency: document.querySelector<HTMLElement>('#card-latency'),
@@ -282,6 +343,13 @@ function applyLanguage(lang: Lang) {
   setText('leaderboard-label', d.leaderboardLabel);
   setText('leaderboard-title', d.leaderboardTitle);
   setText('leaderboard-sub', d.leaderboardSub);
+  setText('spec-title', d.specTitle);
+  setText('spec-sub', d.specSub);
+  setText('spec-ram', d.specRam);
+  setText('spec-disk', d.specDisk);
+  setText('spec-io', d.specIo);
+  setText('profile-title', d.profileTitle);
+  setText('step-overload', d.stepOverload);
   setText('tag-live', d.tagLive);
   setText('th-rank', lang === 'ko' ? '순위' : 'Rank');
   setText('th-user', lang === 'ko' ? '사용자' : 'User');
@@ -298,14 +366,22 @@ function applyLanguage(lang: Lang) {
 
   els.buttons.forEach((btn) => {
     const level = btn.dataset.level as LoadLevel;
-    btn.textContent =
-      level === 'low'
-        ? lang === 'ko' ? 'Low 부하' : 'Low Load'
-        : level === 'normal'
-        ? lang === 'ko' ? 'Normal 부하' : 'Normal Load'
-        : lang === 'ko'
-        ? 'Peak 부하'
-        : 'Peak Load';
+    switch (level) {
+      case 'low':
+        btn.textContent = lang === 'ko' ? 'Low 부하' : 'Low Load';
+        break;
+      case 'normal':
+        btn.textContent = lang === 'ko' ? 'Normal 부하' : 'Normal Load';
+        break;
+      case 'peak':
+        btn.textContent = lang === 'ko' ? 'Peak 부하' : 'Peak Load';
+        break;
+      case 'overload':
+        btn.textContent = lang === 'ko' ? d.overloadButton : d.overloadButton;
+        break;
+      default:
+        btn.textContent = level;
+    }
   });
 
   els.langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
@@ -317,6 +393,7 @@ function applyLanguage(lang: Lang) {
 
   if (state.lastSnapshot) {
     updateCards(state.lastSnapshot);
+    renderProfileInfo(state.lastSnapshot);
   }
   renderLeaderboard(state.leaderboard);
 }
@@ -331,6 +408,66 @@ function setWarning(message?: string, opts?: { prefix?: boolean }) {
   els.warning.hidden = false;
   const usePrefix = opts?.prefix ?? true;
   els.warning.textContent = usePrefix ? `${dict().warningPrefix}${message}` : message;
+}
+
+function renderProfileInfo(snapshot: MetricSnapshot) {
+  const d = dict();
+  const total = snapshot.memoryTotalMb ?? snapshot.memoryCapacityMb;
+  const free = snapshot.memoryFreeMb;
+  const headroom = typeof snapshot.memoryHeadroomMb === 'number' && total ? Math.max(snapshot.memoryHeadroomMb, 0) : undefined;
+  const diskRead = snapshot.diskReadMBps ?? 0;
+  const diskWrite = snapshot.diskWriteMBps ?? 0;
+
+  if (els.profile.cpu) {
+    els.profile.cpu.textContent =
+      state.lang === 'ko'
+        ? `CPU 현재: ${snapshot.cpu.toFixed(1)}% · 단계: ${snapshot.level}`
+        : `CPU now: ${snapshot.cpu.toFixed(1)}% · stage: ${snapshot.level}`;
+  }
+  if (els.profile.mem) {
+    const usedLabel =
+      total && free
+        ? `${snapshot.memoryMb}MB / ${total}MB (free ${free}MB)`
+        : `${snapshot.memoryMb}MB`;
+    els.profile.mem.textContent =
+      state.lang === 'ko' ? `메모리 사용: ${usedLabel}` : `Memory use: ${usedLabel}`;
+  }
+  if (els.profile.rps) {
+    els.profile.rps.textContent = `${state.lang === 'ko' ? '실시간 RPS' : 'Live RPS'}: ${snapshot.rps.toFixed(1)} req/s`;
+  }
+  if (els.profile.latency) {
+    els.profile.latency.textContent =
+      state.lang === 'ko'
+        ? `평균 지연(15초): ${snapshot.responseTimeMs.toFixed(0)} ms`
+        : `Avg latency (15s): ${snapshot.responseTimeMs.toFixed(0)} ms`;
+  }
+  if (els.profile.error) {
+    els.profile.error.textContent =
+      state.lang === 'ko'
+        ? `오류율(15초): ${snapshot.errorRate.toFixed(1)}%`
+        : `Error rate (15s): ${snapshot.errorRate.toFixed(1)}%`;
+  }
+  if (els.profile.note) {
+    const diskLabel =
+      state.lang === 'ko'
+        ? `디스크 IO: R ${diskRead.toFixed(2)} MB/s · W ${diskWrite.toFixed(2)} MB/s`
+        : `Disk IO: R ${diskRead.toFixed(2)} MB/s · W ${diskWrite.toFixed(2)} MB/s`;
+    const headroomLabel =
+      headroom && total
+        ? state.lang === 'ko'
+          ? `RAM 여유 ${headroom.toFixed(0)}MB / 총 ${total}MB`
+          : `RAM headroom ${headroom.toFixed(0)}MB / total ${total}MB`
+        : '';
+    const profileNote = snapshot.profile?.notes || '';
+    const parts = [diskLabel, headroomLabel, profileNote].filter(Boolean);
+    els.profile.note.textContent = parts.join(' · ');
+  }
+  if (els.spec.ram && headroom && total) {
+    els.spec.ram.textContent =
+      state.lang === 'ko'
+        ? `RAM 실사용 ${snapshot.memoryMb}MB / ${total}MB, 여유 ${headroom.toFixed(0)}MB`
+        : `RAM usage ${snapshot.memoryMb}MB / ${total}MB, headroom ${headroom.toFixed(0)}MB`;
+  }
 }
 
 function updateCards(snapshot: MetricSnapshot) {
@@ -482,6 +619,7 @@ async function refreshMetrics() {
     state.lastSnapshot = snapshot;
 
     updateCards(snapshot);
+    renderProfileInfo(snapshot);
     setWarning(snapshot.warning);
 
     if (state.charts) {

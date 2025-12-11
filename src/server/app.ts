@@ -1,7 +1,9 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import { collectMetrics, LoadLevel, MetricSnapshot, recordRequest } from './metrics';
+import { collectMetrics, MetricSnapshot, recordRequest } from './metrics';
+import { loadManager } from './loadManager';
+import { LoadLevel } from './types';
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -47,8 +49,9 @@ function ensureEntry(name: string): LeaderboardEntry {
 }
 
 function computeServerState(snapshot: MetricSnapshot) {
-  if (snapshot.errorRate >= 5) return 'Unstable';
-  if (snapshot.errorRate >= 1.5 || snapshot.responseTimeMs >= 400) return 'Minor Errors';
+  if (snapshot.level === 'overload' || snapshot.errorRate >= 8 || snapshot.responseTimeMs >= 550) return 'Critical';
+  if (snapshot.errorRate >= 3.5 || snapshot.responseTimeMs >= 400) return 'Unstable';
+  if (snapshot.errorRate >= 1.5 || snapshot.responseTimeMs >= 320) return 'Minor Errors';
   return 'Stable';
 }
 
@@ -125,7 +128,7 @@ app.get('/api/leaderboard', (_req, res) => {
 });
 
 app.get('/api/metrics', async (req, res) => {
-  const snapshot = await collectMetrics(currentLoad);
+  const snapshot = await collectMetrics(currentLoad, loadManager.getProfile());
   const name = extractName(req);
   updateLeaderboard(name, snapshot);
   res.json(snapshot);
@@ -133,15 +136,16 @@ app.get('/api/metrics', async (req, res) => {
 
 app.post('/api/load/:level', (req, res) => {
   const level = req.params.level as LoadLevel;
-  const allowed: LoadLevel[] = ['low', 'normal', 'peak'];
+  const allowed: LoadLevel[] = ['low', 'normal', 'peak', 'overload'];
 
   if (!allowed.includes(level)) {
     return res.status(400).json({ error: 'Invalid load level', allowed });
   }
 
   currentLoad = level;
+  loadManager.setLevel(level);
 
-  res.json({ level: currentLoad });
+  res.json({ level: currentLoad, profile: loadManager.getProfile() });
 });
 
 app.get('/api/health', (_req, res) => {
