@@ -36,23 +36,26 @@ function aggregateRequests() {
     return { rps, responseTimeMs, errorRate, timestamp: Date.now() };
 }
 async function getDiskDelta() {
+    var _a, _b;
     const io = await systeminformation_1.default.disksIO();
+    const readBytesTotal = (_a = io === null || io === void 0 ? void 0 : io.rIO) !== null && _a !== void 0 ? _a : 0;
+    const writeBytesTotal = (_b = io === null || io === void 0 ? void 0 : io.wIO) !== null && _b !== void 0 ? _b : 0;
     const now = Date.now();
     if (!lastDiskSample) {
-        lastDiskSample = { ts: now, readBytes: io.rIO, writeBytes: io.wIO };
+        lastDiskSample = { ts: now, readBytes: readBytesTotal, writeBytes: writeBytesTotal };
         return { readMBps: 0, writeMBps: 0 };
     }
     const elapsedSec = Math.max((now - lastDiskSample.ts) / 1000, 0.001);
-    const readMBps = Math.max((io.rIO - lastDiskSample.readBytes) / 1024 / 1024 / elapsedSec, 0);
-    const writeMBps = Math.max((io.wIO - lastDiskSample.writeBytes) / 1024 / 1024 / elapsedSec, 0);
-    lastDiskSample = { ts: now, readBytes: io.rIO, writeBytes: io.wIO };
+    const readMBps = Math.max((readBytesTotal - lastDiskSample.readBytes) / 1024 / 1024 / elapsedSec, 0);
+    const writeMBps = Math.max((writeBytesTotal - lastDiskSample.writeBytes) / 1024 / 1024 / elapsedSec, 0);
+    lastDiskSample = { ts: now, readBytes: readBytesTotal, writeBytes: writeBytesTotal };
     return { readMBps, writeMBps };
 }
 async function getSystemStats() {
     var _a, _b;
     const [load, mem, disk] = await Promise.all([systeminformation_1.default.currentLoad(), systeminformation_1.default.mem(), getDiskDelta()]);
     const cpu = Number(load.currentLoad.toFixed(1));
-    const usedBytes = mem.active || mem.used || mem.total - mem.available;
+    const usedBytes = mem.active || mem.used || (mem.total && mem.available ? mem.total - mem.available : 0);
     const memoryMb = Math.round(usedBytes / 1024 / 1024);
     const memoryTotalMb = Math.round(mem.total / 1024 / 1024);
     const memoryFreeMb = Math.round(((_b = (_a = mem.available) !== null && _a !== void 0 ? _a : mem.free) !== null && _b !== void 0 ? _b : mem.total - usedBytes) / 1024 / 1024);
