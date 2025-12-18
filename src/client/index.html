@@ -30,14 +30,14 @@
         <p class="eyebrow">
           금요일 FTP 업로드 관제
           <span class="help-wrap"><button class="help" data-help-key="windows">?</button><span class="help-tooltip"></span></span>
-          · 실습 좌석별 트래픽
+          · 실습 트래픽
           <span class="help-wrap"><button class="help" data-help-key="vmware">?</button><span class="help-tooltip"></span></span>
           · Peak 탐지
           <span class="help-wrap"><button class="help" data-help-key="ts">?</button><span class="help-tooltip"></span></span>
         </p>
-        <h1 id="hero-title">FTP 업로드 성능 · 좌석/IP별 분석</h1>
+        <h1 id="hero-title">FTP 업로드 성능 · 좌석/파일별 분석</h1>
         <p class="lede" id="hero-lede">
-          금요일 실습 때 학생들이 FTP로 올린 파일이 어느 IP/좌석에서 가장 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 많이 먹었는지 한눈에 보여주는 관제형 대시보드입니다.
+          금요일 실습 때 학생들이 FTP로 올린 파일이 어느 좌석에서 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 많이 먹었는지 한눈에 보여주는 관제형 대시보드입니다.
           서버에서 실행하며, 업로드 시점의 처리량·지연·오류율을 실시간으로 수집합니다.
         </p>
         <div class="hero__actions">
@@ -150,15 +150,14 @@
 
       <section class="panel" id="identity">
         <div>
-          <h3 id="identity-title">업로드 태그 설정 (IP/좌석/파일)</h3>
+          <h3 id="identity-title">업로드 태그 설정 (좌석/파일)</h3>
           <p class="sub" id="identity-sub">
-            업로드를 보낸 IP, 좌석번호, 업로드한 파일명(또는 패키지)을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장합니다.
+            업로드를 보낸 좌석번호와 파일명(또는 패키지)을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장합니다.
             <span class="help-wrap"><button class="help" data-help-key="webclient">?</button><span class="help-tooltip"></span></span>
           </p>
           <form id="name-form" class="name-form">
-            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: 10.0.0.12" />
+            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
             <input id="seat-input" name="seat" type="text" minlength="1" maxlength="32" placeholder="좌석/조" />
-            <input id="ip-input" name="ip" type="text" minlength="2" maxlength="64" placeholder="FTP IP (실제)" />
             <input id="file-input" name="file" type="text" minlength="2" maxlength="64" placeholder="업로드한 파일/패키지" />
             <button type="submit" class="pill" id="name-save-btn">저장</button>
             <span class="name-status" id="name-status"></span>
@@ -167,7 +166,7 @@
         <div class="legend">
           <p class="legend__title" id="identity-legend-title">기록 방식</p>
           <ul>
-            <li id="identity-legend-1">업로드 시각·IP/좌석/파일 태그를 함께 기록</li>
+            <li id="identity-legend-1">업로드 시각·좌석/파일 태그를 함께 기록</li>
             <li id="identity-legend-2">CPU/메모리 실측값을 업로드 이벤트와 함께 저장</li>
             <li id="identity-legend-3">최고 처리량, 최저 지연, 오류율, 안정성 점수를 추적</li>
           </ul>
@@ -177,13 +176,13 @@
       <section class="panel panel--insights" id="insights">
         <div>
           <h3 id="insights-title">업로드 통계 스냅샷</h3>
-          <p class="sub" id="insights-sub">금요일 업로드에서 가장 뜨거운 IP, 좌석, 파일과 Peak 처리량을 바로 보여줍니다.</p>
+          <p class="sub" id="insights-sub">금요일 업로드에서 가장 뜨거운 좌석과 파일, Peak 처리량을 바로 보여줍니다.</p>
         </div>
         <div class="insight-grid">
           <article class="insight-card">
-            <p class="label" id="insight-top-ip-label">최고 처리량 IP</p>
-            <p class="value" id="insight-top-ip">--</p>
-            <p class="muted" id="insight-top-ip-meta">데이터 수집 중...</p>
+            <p class="label" id="insight-top-tag-label">최고 처리량 좌석/태그</p>
+            <p class="value" id="insight-top-tag">--</p>
+            <p class="muted" id="insight-top-tag-meta">데이터 수집 중...</p>
           </article>
           <article class="insight-card">
             <p class="label" id="insight-top-file-label">가장 무거운 파일</p>
@@ -252,13 +251,13 @@
           </ul>
         </div>
         <div class="legend">
-          <p class="legend__title" id="monitor-title">
-            모니터링 포인트 (FTP/HTTP)
-            <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <ul>
-            <li id="monitor-1">
-              업로드 로그: IP·좌석·파일명과 타임스탬프
+            <p class="legend__title" id="monitor-title">
+              모니터링 포인트 (FTP/HTTP)
+              <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <ul>
+              <li id="monitor-1">
+              업로드 로그: 좌석·파일명과 타임스탬프
               <span class="help-wrap"><button class="help" data-help-key="perfmon">?</button><span class="help-tooltip"></span></span>
             </li>
             <li id="monitor-2">
@@ -294,7 +293,7 @@
             <thead>
               <tr>
                 <th id="th-rank">Rank</th>
-                <th id="th-user">IP / 좌석 / 파일</th>
+                <th id="th-user">좌석 / 파일</th>
                 <th id="th-peak">Peak 처리량</th>
                 <th id="th-latency">평균 지연</th>
                 <th id="th-error">오류율</th>

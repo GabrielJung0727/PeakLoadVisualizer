@@ -84,7 +84,6 @@ type Translations = {
   leaderboardError: string;
   leaderboardEmpty: string;
   namePlaceholder: string;
-  ipPlaceholder: string;
   seatPlaceholder: string;
   filePlaceholder: string;
   nameSaved: (name: string) => string;
@@ -93,7 +92,7 @@ type Translations = {
   tagLive: string;
   insightsTitle: string;
   insightsSub: string;
-  insightTopIpLabel: string;
+  insightTopTagLabel: string;
   insightTopFileLabel: string;
   insightPeakLabel: string;
   insightSeatLabel: string;
@@ -105,17 +104,17 @@ const translations: Record<Lang, Translations> = {
     navIdentity: '업로드 태그',
     navInsights: '업로드 통계',
     navLeaderboard: '리더보드',
-    heroTitle: 'FTP 업로드 성능 · 좌석/IP별 분석',
+    heroTitle: 'FTP 업로드 성능 · 좌석/파일별 분석',
     heroLede:
-      '금요일 실습에서 학생들이 FTP로 업로드한 파일이 어느 IP/좌석에서 가장 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 잡아먹었는지 실시간으로 보여줍니다. 서버에서 직접 실행하며 업로드 시점의 지표를 기록합니다.',
+      '금요일 실습에서 학생들이 FTP로 업로드한 파일이 어느 좌석에서 가장 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 잡아먹었는지 실시간으로 보여줍니다. 서버에서 직접 실행하며 업로드 시점의 지표를 기록합니다.',
     heroNote: 'IIS 또는 Node.js(Express)에 FTP 업로드 로그를 연동해 RPS/지연/오류율을 즉시 기록합니다.',
     highlightTitle: '금요일 업로드 모니터',
     highlightSub: '업로드 처리량, 지연, 오류율을 실시간으로 폴링합니다.',
-    identityTitle: '업로드 태그 설정 (IP/좌석/파일)',
+    identityTitle: '업로드 태그 설정 (좌석/파일)',
     identitySub:
-      '업로드를 보낸 IP, 좌석, 파일명을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장됩니다.',
+      '업로드를 보낸 좌석, 파일명을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장됩니다.',
     identityLegendTitle: '기록 방식',
-    identityLegend1: '업로드 시각 · IP · 좌석 · 파일 태그를 함께 기록',
+    identityLegend1: '업로드 시각 · 좌석 · 파일 태그를 함께 기록',
     identityLegend2: 'CPU/메모리 실측(systeminformation) 반영',
     identityLegend3: '최고 처리량, 최저 지연, 오류율, 안정성 점수를 추적',
     stepsTitle: '금요일 업로드 체크리스트',
@@ -129,8 +128,8 @@ const translations: Record<Lang, Translations> = {
     monitor2: '시스템 계측: CPU/메모리/디스크 IO',
     monitor3: 'Peak 알람: 지연·오류율 증가 시 배너 확인',
     leaderboardLabel: '리더보드',
-    leaderboardTitle: 'IP/파일별 업로드 순위',
-    leaderboardSub: 'IP·좌석·파일 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.',
+    leaderboardTitle: '좌석/파일별 업로드 순위',
+    leaderboardSub: '좌석·파일 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.',
     specTitle: 'FTP 업로드 · 실시간 계측',
     specSub: '업로드 순간의 CPU·메모리·디스크 IO를 읽어 태그와 함께 기록합니다.',
     specRam: 'RAM 실시간 사용/여유를 계산합니다.',
@@ -146,8 +145,7 @@ const translations: Record<Lang, Translations> = {
     metricsError: '메트릭을 불러올 수 없습니다. 서버 상태를 확인하세요.',
     leaderboardError: '리더보드를 불러올 수 없습니다.',
     leaderboardEmpty: '데이터 수집 대기 중...',
-    namePlaceholder: '예: 10.0.0.12',
-    ipPlaceholder: 'FTP 원본 IP',
+    namePlaceholder: '예: StudentA',
     seatPlaceholder: '좌석/조',
     filePlaceholder: '업로드 파일/패키지',
     nameSaved: (name: string) => `저장됨: ${name}`,
@@ -155,8 +153,8 @@ const translations: Record<Lang, Translations> = {
     loadSwitchError: '부하 단계 전환 실패',
     tagLive: '실시간',
     insightsTitle: '업로드 통계 스냅샷',
-    insightsSub: '금요일 업로드에서 가장 뜨거운 IP, 좌석, 파일, Peak 처리량을 바로 보여줍니다.',
-    insightTopIpLabel: '최고 처리량 IP',
+    insightsSub: '금요일 업로드에서 가장 뜨거운 좌석, 파일, Peak 처리량을 바로 보여줍니다.',
+    insightTopTagLabel: '최고 처리량 좌석/태그',
     insightTopFileLabel: '가장 무거운 파일',
     insightPeakLabel: '최고 처리량 순간',
     insightSeatLabel: '가장 바쁜 좌석'
@@ -166,17 +164,17 @@ const translations: Record<Lang, Translations> = {
     navIdentity: 'Upload Tags',
     navInsights: 'Insights',
     navLeaderboard: 'Leaderboard',
-    heroTitle: 'FTP Upload Performance · IP/Seat Analytics',
+    heroTitle: 'FTP Upload Performance · Seat/File Analytics',
     heroLede:
-      'For Friday labs, see which IP/seat pushed the most bytes over FTP and which file stressed the server the most. Runs on the server and captures RPS, latency, errors at upload time.',
+      'For Friday labs, see which seat pushed the most bytes over FTP and which file stressed the server the most. Runs on the server and captures RPS, latency, errors at upload time.',
     heroNote: 'Attach FTP upload logs to IIS/Node.js (Express) and stream RPS/latency/error in real time.',
     highlightTitle: 'Friday Upload Monitor',
     highlightSub: 'Live polling throughput, latency, and error rate.',
-    identityTitle: 'Upload Tags (IP/Seat/File)',
+    identityTitle: 'Upload Tags (Seat/File)',
     identitySub:
-      'Tag your upload with source IP, seat, and file/package. The tags appear on the leaderboard and insight cards. Stored locally only.',
+      'Tag your upload with seat and file/package. The tags appear on the leaderboard and insight cards. Stored locally only.',
     identityLegendTitle: 'How it records',
-    identityLegend1: 'Stores timestamp + IP + seat + file tag together',
+    identityLegend1: 'Stores timestamp + seat + file tag together',
     identityLegend2: 'CPU/memory from systeminformation (OS metrics)',
     identityLegend3: 'Tracks peak throughput, lowest latency, error rate, stability score',
     stepsTitle: 'Friday Upload Checklist',
@@ -190,8 +188,8 @@ const translations: Record<Lang, Translations> = {
     monitor2: 'System probes: CPU/memory/disk IO',
     monitor3: 'Peak alarms: banner on latency/error spikes',
     leaderboardLabel: 'Leaderboard',
-    leaderboardTitle: 'Upload Ranking by IP/File',
-    leaderboardSub: 'Peak throughput, avg latency, error rate, and stability per IP/seat/file tag.',
+    leaderboardTitle: 'Upload Ranking by Seat/File',
+    leaderboardSub: 'Peak throughput, avg latency, error rate, and stability per seat/file tag.',
     specTitle: 'FTP Upload · Live probes',
     specSub: 'Captures CPU/memory/disk IO at the moment of upload and links to your tags.',
     specRam: 'Live RAM use and headroom.',
@@ -207,8 +205,7 @@ const translations: Record<Lang, Translations> = {
     metricsError: 'Unable to load metrics. Check server health.',
     leaderboardError: 'Unable to load leaderboard.',
     leaderboardEmpty: 'Waiting for data...',
-    namePlaceholder: 'e.g., 10.0.0.12',
-    ipPlaceholder: 'FTP source IP',
+    namePlaceholder: 'e.g., StudentA',
     seatPlaceholder: 'Seat/Group',
     filePlaceholder: 'Uploaded file/package',
     nameSaved: (name: string) => `Saved: ${name}`,
@@ -216,8 +213,8 @@ const translations: Record<Lang, Translations> = {
     loadSwitchError: 'Failed to change load level',
     tagLive: 'Live',
     insightsTitle: 'Upload Insight Snapshot',
-    insightsSub: 'Instantly see the hottest IP, seat, file, and peak throughput from the Friday session.',
-    insightTopIpLabel: 'Top throughput IP',
+    insightsSub: 'Instantly see the hottest seat, file, and peak throughput from the Friday session.',
+    insightTopTagLabel: 'Top throughput tag',
     insightTopFileLabel: 'Heaviest file',
     insightPeakLabel: 'Peak throughput moment',
     insightSeatLabel: 'Busiest seat'
@@ -295,15 +292,14 @@ const els = {
     form: document.querySelector<HTMLFormElement>('#name-form'),
     input: document.querySelector<HTMLInputElement>('#name-input'),
     seatInput: document.querySelector<HTMLInputElement>('#seat-input'),
-    ipInput: document.querySelector<HTMLInputElement>('#ip-input'),
     fileInput: document.querySelector<HTMLInputElement>('#file-input'),
     status: document.querySelector<HTMLElement>('#name-status')
   },
   langButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('.lang-btn')),
   leaderboardBody: document.querySelector<HTMLTableSectionElement>('#leaderboard-body'),
   insights: {
-    topIp: document.querySelector<HTMLElement>('#insight-top-ip'),
-    topIpMeta: document.querySelector<HTMLElement>('#insight-top-ip-meta'),
+    topTag: document.querySelector<HTMLElement>('#insight-top-tag'),
+    topTagMeta: document.querySelector<HTMLElement>('#insight-top-tag-meta'),
     topFile: document.querySelector<HTMLElement>('#insight-top-file'),
     topFileMeta: document.querySelector<HTMLElement>('#insight-top-file-meta'),
     peakRps: document.querySelector<HTMLElement>('#insight-peak-rps'),
@@ -323,7 +319,6 @@ const state: {
   lang: Lang;
   lastSnapshot?: MetricSnapshot;
   identity: {
-    ip: string;
     seat: string;
     file: string;
   };
@@ -334,7 +329,6 @@ const state: {
   lang: (localStorage.getItem('lang') as Lang) === 'en' ? 'en' : 'ko',
   name: localStorage.getItem('nickname') || 'Guest',
   identity: {
-    ip: localStorage.getItem('ipTag') || '',
     seat: localStorage.getItem('seatTag') || '',
     file: localStorage.getItem('fileTag') || ''
   }
@@ -349,7 +343,6 @@ function setText(id: string, value: string) {
 
 function buildIdentityLabel() {
   const parts = [];
-  if (state.identity.ip) parts.push(`IP ${state.identity.ip}`);
   if (state.identity.seat) parts.push(`Seat ${state.identity.seat}`);
   if (state.identity.file) parts.push(state.identity.file);
   if (state.name) parts.push(state.name);
@@ -420,12 +413,12 @@ function applyLanguage(lang: Lang) {
   setText('tag-live', d.tagLive);
   setText('insights-title', d.insightsTitle);
   setText('insights-sub', d.insightsSub);
-  setText('insight-top-ip-label', d.insightTopIpLabel);
+  setText('insight-top-tag-label', d.insightTopTagLabel);
   setText('insight-top-file-label', d.insightTopFileLabel);
   setText('insight-peak-label', d.insightPeakLabel);
   setText('insight-seat-label', d.insightSeatLabel);
   setText('th-rank', lang === 'ko' ? '순위' : 'Rank');
-  setText('th-user', lang === 'ko' ? 'IP / Seat / File' : 'IP / Seat / File');
+  setText('th-user', lang === 'ko' ? 'Seat / File' : 'Seat / File');
   setText('th-peak', lang === 'ko' ? 'Peak 처리량' : 'Peak throughput');
   setText('th-latency', lang === 'ko' ? '평균 지연' : 'Avg latency');
   setText('th-error', lang === 'ko' ? '오류율' : 'Error rate');
@@ -433,11 +426,9 @@ function applyLanguage(lang: Lang) {
   setText('th-stability', lang === 'ko' ? '안정성' : 'Stability');
 
   const nameInput = document.getElementById('name-input') as HTMLInputElement | null;
-  const ipInput = document.getElementById('ip-input') as HTMLInputElement | null;
   const seatInput = document.getElementById('seat-input') as HTMLInputElement | null;
   const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
   if (nameInput) nameInput.placeholder = d.namePlaceholder;
-  if (ipInput) ipInput.placeholder = d.ipPlaceholder;
   if (seatInput) seatInput.placeholder = d.seatPlaceholder;
   if (fileInput) fileInput.placeholder = d.filePlaceholder;
   const nameBtn = document.getElementById('name-save-btn');
@@ -491,11 +482,6 @@ function setWarning(message?: string, opts?: { prefix?: boolean }) {
 
 function parseLabelSegments(label: string) {
   const parts = label.split('|').map((p) => p.trim()).filter(Boolean);
-  const ip =
-    parts.find((p) => /^ip\b/i.test(p))?.replace(/^ip\b[:\s]*/i, '') ||
-    parts.find((p) => /^\d{1,3}(\.\d{1,3}){3}/.test(p)) ||
-    parts[0] ||
-    '';
   const seat =
     parts.find((p) => /(seat|좌석|조)/i.test(p))?.replace(/^(seat|좌석|조)\b[:\s]*/i, '') ||
     parts.find((p) => /desk|row|lab/i.test(p)) ||
@@ -504,7 +490,7 @@ function parseLabelSegments(label: string) {
     parts.find((p) => /(zip|tar|iso|msi|pkg|exe|apk|img|bin|file|패키지|파일)/i.test(p)) ||
     (parts.length > 1 ? parts[parts.length - 1] : '') ||
     '';
-  return { ip: ip || '', seat: seat || '', file: file || '' };
+  return { seat: seat || '', file: file || '' };
 }
 
 function formatClock(timestamp: number) {
@@ -588,14 +574,15 @@ function renderInsights(entries: LeaderboardEntry[]) {
   const top = entries[0];
   const recent = [...entries].sort((a, b) => b.updatedAt - a.updatedAt)[0];
 
-  if (els.insights.topIp && els.insights.topIpMeta) {
+  if (els.insights.topTag && els.insights.topTagMeta) {
     if (top) {
       const tag = parseLabelSegments(top.name);
-      els.insights.topIp.textContent = tag.ip || top.name;
-      els.insights.topIpMeta.textContent = `${top.peakRps.toFixed(1)} req/s · ${top.serverState}`;
+      const label = tag.seat || tag.file || top.name;
+      els.insights.topTag.textContent = label;
+      els.insights.topTagMeta.textContent = `${top.peakRps.toFixed(1)} req/s · ${top.serverState}`;
     } else {
-      els.insights.topIp.textContent = '--';
-      els.insights.topIpMeta.textContent = waiting;
+      els.insights.topTag.textContent = '--';
+      els.insights.topTagMeta.textContent = waiting;
     }
   }
 
@@ -604,7 +591,7 @@ function renderInsights(entries: LeaderboardEntry[]) {
       const tag = parseLabelSegments(top.name);
       const label = tag.file || noFile;
       els.insights.topFile.textContent = label;
-      const meta = tag.ip || tag.seat || top.name;
+      const meta = tag.seat || top.name;
       els.insights.topFileMeta.textContent = meta;
     } else {
       els.insights.topFile.textContent = '--';
@@ -880,19 +867,17 @@ async function refreshLeaderboard() {
 
 function bindIdentityForm() {
   if (!els.identity.form || !els.identity.input) return;
-  const { input, seatInput, ipInput, fileInput } = els.identity;
+  const { input, seatInput, fileInput } = els.identity;
   input.value = state.name;
   if (seatInput) seatInput.value = state.identity.seat;
-  if (ipInput) ipInput.value = state.identity.ip;
   if (fileInput) fileInput.value = state.identity.file;
   setNameStatus(dict().nameSaved(buildIdentityLabel()), 'ok');
   els.identity.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = input.value.trim();
     const seat = seatInput?.value.trim() || '';
-    const ip = ipInput?.value.trim() || '';
     const file = fileInput?.value.trim() || '';
-    const labelParts = [ip ? `IP ${ip}` : '', seat ? `Seat ${seat}` : '', file, name].filter(Boolean);
+    const labelParts = [seat ? `Seat ${seat}` : '', file, name].filter(Boolean);
     const label = labelParts.join(' | ');
     if (label.length < 2) {
       setNameStatus(dict().nameTooShort, 'error');
@@ -901,12 +886,10 @@ function bindIdentityForm() {
     state.name = name.slice(0, 32) || 'Guest';
     state.identity = {
       seat: seat.slice(0, 32),
-      ip: ip.slice(0, 64),
       file: file.slice(0, 64)
     };
     localStorage.setItem('nickname', state.name);
     localStorage.setItem('seatTag', state.identity.seat);
-    localStorage.setItem('ipTag', state.identity.ip);
     localStorage.setItem('fileTag', state.identity.file);
     setNameStatus(dict().nameSaved(label), 'ok');
     renderInsights(state.leaderboard);
