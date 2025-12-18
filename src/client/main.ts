@@ -1,3 +1,5 @@
+export {};
+
 type LoadLevel = 'low' | 'normal' | 'peak' | 'overload';
 type Lang = 'ko' | 'en';
 
@@ -41,6 +43,7 @@ type LeaderboardEntry = {
 type Translations = {
   navDashboard: string;
   navIdentity: string;
+  navInsights: string;
   navLeaderboard: string;
   heroTitle: string;
   heroLede: string;
@@ -81,51 +84,61 @@ type Translations = {
   leaderboardError: string;
   leaderboardEmpty: string;
   namePlaceholder: string;
+  ipPlaceholder: string;
+  seatPlaceholder: string;
+  filePlaceholder: string;
   nameSaved: (name: string) => string;
   nameTooShort: string;
   loadSwitchError: string;
   tagLive: string;
+  insightsTitle: string;
+  insightsSub: string;
+  insightTopIpLabel: string;
+  insightTopFileLabel: string;
+  insightPeakLabel: string;
+  insightSeatLabel: string;
 };
 
 const translations: Record<Lang, Translations> = {
   ko: {
     navDashboard: '대시보드',
-    navIdentity: '닉네임 설정',
+    navIdentity: '업로드 태그',
+    navInsights: '업로드 통계',
     navLeaderboard: '리더보드',
-    heroTitle: '동적 부하 처리 웹서비스 & Peak 성능 분석',
+    heroTitle: 'FTP 업로드 성능 · 좌석/IP별 분석',
     heroLede:
-      '요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드. 후배/수강생이 직접 버튼을 눌러 부하 변화를 체험할 수 있습니다.',
-    heroNote: 'IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능',
-    highlightTitle: 'Peak 대비 상태',
-    highlightSub: 'RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.',
-    identityTitle: '닉네임 설정 (일시적)',
+      '금요일 실습에서 학생들이 FTP로 업로드한 파일이 어느 IP/좌석에서 가장 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 잡아먹었는지 실시간으로 보여줍니다. 서버에서 직접 실행하며 업로드 시점의 지표를 기록합니다.',
+    heroNote: 'IIS 또는 Node.js(Express)에 FTP 업로드 로그를 연동해 RPS/지연/오류율을 즉시 기록합니다.',
+    highlightTitle: '금요일 업로드 모니터',
+    highlightSub: '업로드 처리량, 지연, 오류율을 실시간으로 폴링합니다.',
+    identityTitle: '업로드 태그 설정 (IP/좌석/파일)',
     identitySub:
-      '현재 세션에서 사용할 닉네임을 설정하면 리더보드에 기록됩니다. IP나 계정 연동 없이, 로컬에만 임시 저장됩니다.',
+      '업로드를 보낸 IP, 좌석, 파일명을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장됩니다.',
     identityLegendTitle: '기록 방식',
-    identityLegend1: '최근 15초 이동창으로 RPS/지연/오류율 계산',
+    identityLegend1: '업로드 시각 · IP · 좌석 · 파일 태그를 함께 기록',
     identityLegend2: 'CPU/메모리 실측(systeminformation) 반영',
-    identityLegend3: '최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장',
-    stepsTitle: '단계별 부하 실습',
+    identityLegend3: '최고 처리량, 최저 지연, 오류율, 안정성 점수를 추적',
+    stepsTitle: '금요일 업로드 체크리스트',
     stepsSub:
-      '버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다. 실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.',
-    stepLow: 'Low: 캐시 워밍업, 정상 지표 확인',
-    stepNormal: 'Normal: 평균 응답 시간과 CPU 안정성 확인',
-    stepPeak: 'Peak: 지연/오류율 상승 시 경고 배너 확인',
-    monitorTitle: '모니터링 포인트',
-    monitor1: 'Performance Monitor: % Processor Time, Available MBytes',
-    monitor2: '로드툴: k6/AB/JMeter 결과와 그래프 비교',
-    monitor3: 'Task Manager 캡처로 실시간 리소스 공유',
+      'FTP 업로드와 함께 load level을 전환하면 `/api/load/:level`이 호출되고 `/api/metrics`가 갱신됩니다. 업로드 트래픽 기록과 함께 사용하세요.',
+    stepLow: 'Warm-up: 베이스라인 RPS/지연 확보',
+    stepNormal: 'Normal: 평균 지연과 CPU 안정성 확인',
+    stepPeak: 'Peak: 업로드 폭주 시 경고 배너 확인',
+    monitorTitle: '모니터링 포인트 (FTP/HTTP)',
+    monitor1: '업로드 로그: IP·좌석·파일명과 타임스탬프',
+    monitor2: '시스템 계측: CPU/메모리/디스크 IO',
+    monitor3: 'Peak 알람: 지연·오류율 증가 시 배너 확인',
     leaderboardLabel: '리더보드',
-    leaderboardTitle: '실시간 성능 순위',
-    leaderboardSub: '최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.',
-    specTitle: 'Windows Server 2016 · 실시간 계측',
-    specSub: 'Task Manager/PerfMon과 동일한 실시간 CPU·메모리·디스크 값을 그대로 표시합니다.',
-    specRam: '실시간 RAM 사용/여유를 계산합니다.',
+    leaderboardTitle: 'IP/파일별 업로드 순위',
+    leaderboardSub: 'IP·좌석·파일 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.',
+    specTitle: 'FTP 업로드 · 실시간 계측',
+    specSub: '업로드 순간의 CPU·메모리·디스크 IO를 읽어 태그와 함께 기록합니다.',
+    specRam: 'RAM 실시간 사용/여유를 계산합니다.',
     specDisk: '실시간 디스크 IO(R/W MB/s)를 표시합니다.',
-    specIo: 'IIS/Express 공용 · temp 파일 쓰기로 IO를 발생시킵니다.',
-    profileTitle: '실시간 시스템 상태',
+    specIo: '업로드 이벤트와 함께 서버 내부 계측값을 동기화합니다.',
+    profileTitle: '라이브 업로드 상태',
     stepOverload: 'Overload: 의도적 포화(오류율/지연 급증)',
-    overloadButton: 'Overload 과부하',
+    overloadButton: '과부하 테스트',
     ioOn: '켜짐',
     ioOff: '꺼짐',
     warningPrefix: 'Peak 단계 경고: ',
@@ -133,48 +146,58 @@ const translations: Record<Lang, Translations> = {
     metricsError: '메트릭을 불러올 수 없습니다. 서버 상태를 확인하세요.',
     leaderboardError: '리더보드를 불러올 수 없습니다.',
     leaderboardEmpty: '데이터 수집 대기 중...',
-    namePlaceholder: '예: StudentA',
+    namePlaceholder: '예: 10.0.0.12',
+    ipPlaceholder: 'FTP 원본 IP',
+    seatPlaceholder: '좌석/조',
+    filePlaceholder: '업로드 파일/패키지',
     nameSaved: (name: string) => `저장됨: ${name}`,
     nameTooShort: '2자 이상 입력하세요.',
     loadSwitchError: '부하 단계 전환 실패',
-    tagLive: '실시간'
+    tagLive: '실시간',
+    insightsTitle: '업로드 통계 스냅샷',
+    insightsSub: '금요일 업로드에서 가장 뜨거운 IP, 좌석, 파일, Peak 처리량을 바로 보여줍니다.',
+    insightTopIpLabel: '최고 처리량 IP',
+    insightTopFileLabel: '가장 무거운 파일',
+    insightPeakLabel: '최고 처리량 순간',
+    insightSeatLabel: '가장 바쁜 좌석'
   },
   en: {
     navDashboard: 'Dashboard',
-    navIdentity: 'Set Nickname',
+    navIdentity: 'Upload Tags',
+    navInsights: 'Insights',
     navLeaderboard: 'Leaderboard',
-    heroTitle: 'Dynamic Load Service & Peak Performance Analysis',
+    heroTitle: 'FTP Upload Performance · IP/Seat Analytics',
     heroLede:
-      'Raise load step-by-step and visualize RPS, CPU, memory, response time, and error rate in one view. Students can trigger changes themselves.',
-    heroNote: 'Works with IIS or Node.js (Express) + k6/AB/JMeter',
-    highlightTitle: 'Peak Readiness',
-    highlightSub: 'Polling RPS, latency, and error rate in real time.',
-    identityTitle: 'Nickname (temp, local)',
+      'For Friday labs, see which IP/seat pushed the most bytes over FTP and which file stressed the server the most. Runs on the server and captures RPS, latency, errors at upload time.',
+    heroNote: 'Attach FTP upload logs to IIS/Node.js (Express) and stream RPS/latency/error in real time.',
+    highlightTitle: 'Friday Upload Monitor',
+    highlightSub: 'Live polling throughput, latency, and error rate.',
+    identityTitle: 'Upload Tags (IP/Seat/File)',
     identitySub:
-      'Set a temporary nickname for this session; results on the leaderboard will use it. No IP/account is stored—kept in your browser only.',
+      'Tag your upload with source IP, seat, and file/package. The tags appear on the leaderboard and insight cards. Stored locally only.',
     identityLegendTitle: 'How it records',
-    identityLegend1: '15s sliding window for RPS/latency/error rate',
+    identityLegend1: 'Stores timestamp + IP + seat + file tag together',
     identityLegend2: 'CPU/memory from systeminformation (OS metrics)',
-    identityLegend3: 'Stores peak RPS, lowest avg latency, lowest error rate, stability score',
-    stepsTitle: 'Load Lab Steps',
+    identityLegend3: 'Tracks peak throughput, lowest latency, error rate, stability score',
+    stepsTitle: 'Friday Upload Checklist',
     stepsSub:
-      'Click a button to change load level; `/api/load/:level` and `/api/metrics` update together. Hook your k6/AB/JMeter runs here.',
-    stepLow: 'Low: Warm cache, verify baseline',
-    stepNormal: 'Normal: Watch avg latency and CPU stability',
-    stepPeak: 'Peak: Observe latency/error warnings',
-    monitorTitle: 'Monitoring Points',
-    monitor1: 'Performance Monitor: % Processor Time, Available MBytes',
-    monitor2: 'Load tools: compare k6/AB/JMeter results with graphs',
-    monitor3: 'Share Task Manager for live resource view',
+      'Switch load levels while you upload. `/api/load/:level` and `/api/metrics` update together—use it to mark each FTP burst.',
+    stepLow: 'Warm-up: secure baseline throughput/latency',
+    stepNormal: 'Normal: watch average latency and CPU stability',
+    stepPeak: 'Peak: watch the warning banner during surges',
+    monitorTitle: 'Monitoring (FTP/HTTP)',
+    monitor1: 'Upload logs: IP, seat, file name, timestamp',
+    monitor2: 'System probes: CPU/memory/disk IO',
+    monitor3: 'Peak alarms: banner on latency/error spikes',
     leaderboardLabel: 'Leaderboard',
-    leaderboardTitle: 'Live Performance Ranking',
-    leaderboardSub: 'Ranked by peak RPS, lowest avg latency, error rate, and stability score.',
-    specTitle: 'Windows Server 2016 · Live readings',
-    specSub: 'Shows the exact CPU / memory / disk IO you see in Task Manager or PerfMon, live.',
-    specRam: 'Displays live RAM use/headroom (no synthetic numbers).',
-    specDisk: 'Shows live disk IO (R/W MB/s).',
-    specIo: 'Works on IIS or Express; temp writes generate IO deterministically.',
-    profileTitle: 'Live system state',
+    leaderboardTitle: 'Upload Ranking by IP/File',
+    leaderboardSub: 'Peak throughput, avg latency, error rate, and stability per IP/seat/file tag.',
+    specTitle: 'FTP Upload · Live probes',
+    specSub: 'Captures CPU/memory/disk IO at the moment of upload and links to your tags.',
+    specRam: 'Live RAM use and headroom.',
+    specDisk: 'Live disk IO (R/W MB/s).',
+    specIo: 'Syncs server probes with upload events.',
+    profileTitle: 'Live upload status',
     stepOverload: 'Overload: intentional saturation (latency/error spike)',
     overloadButton: 'Overload',
     ioOn: 'on',
@@ -184,11 +207,20 @@ const translations: Record<Lang, Translations> = {
     metricsError: 'Unable to load metrics. Check server health.',
     leaderboardError: 'Unable to load leaderboard.',
     leaderboardEmpty: 'Waiting for data...',
-    namePlaceholder: 'e.g., StudentA',
+    namePlaceholder: 'e.g., 10.0.0.12',
+    ipPlaceholder: 'FTP source IP',
+    seatPlaceholder: 'Seat/Group',
+    filePlaceholder: 'Uploaded file/package',
     nameSaved: (name: string) => `Saved: ${name}`,
     nameTooShort: 'Enter at least 2 characters.',
     loadSwitchError: 'Failed to change load level',
-    tagLive: 'Live'
+    tagLive: 'Live',
+    insightsTitle: 'Upload Insight Snapshot',
+    insightsSub: 'Instantly see the hottest IP, seat, file, and peak throughput from the Friday session.',
+    insightTopIpLabel: 'Top throughput IP',
+    insightTopFileLabel: 'Heaviest file',
+    insightPeakLabel: 'Peak throughput moment',
+    insightSeatLabel: 'Busiest seat'
   }
 };
 
@@ -223,8 +255,8 @@ type ChartSet = {
 
 const MAX_POINTS = 30;
 const levelLabels: Record<Lang, Record<LoadLevel, string>> = {
-  ko: { low: 'Low', normal: 'Normal', peak: 'Peak', overload: 'Overload' },
-  en: { low: 'Low', normal: 'Normal', peak: 'Peak', overload: 'Overload' }
+  ko: { low: 'Warm-up', normal: 'Normal', peak: 'Peak', overload: 'Overload' },
+  en: { low: 'Warm-up', normal: 'Normal', peak: 'Peak', overload: 'Overload' }
 };
 
 const els = {
@@ -262,10 +294,23 @@ const els = {
   identity: {
     form: document.querySelector<HTMLFormElement>('#name-form'),
     input: document.querySelector<HTMLInputElement>('#name-input'),
+    seatInput: document.querySelector<HTMLInputElement>('#seat-input'),
+    ipInput: document.querySelector<HTMLInputElement>('#ip-input'),
+    fileInput: document.querySelector<HTMLInputElement>('#file-input'),
     status: document.querySelector<HTMLElement>('#name-status')
   },
   langButtons: Array.from(document.querySelectorAll<HTMLButtonElement>('.lang-btn')),
-  leaderboardBody: document.querySelector<HTMLTableSectionElement>('#leaderboard-body')
+  leaderboardBody: document.querySelector<HTMLTableSectionElement>('#leaderboard-body'),
+  insights: {
+    topIp: document.querySelector<HTMLElement>('#insight-top-ip'),
+    topIpMeta: document.querySelector<HTMLElement>('#insight-top-ip-meta'),
+    topFile: document.querySelector<HTMLElement>('#insight-top-file'),
+    topFileMeta: document.querySelector<HTMLElement>('#insight-top-file-meta'),
+    peakRps: document.querySelector<HTMLElement>('#insight-peak-rps'),
+    peakMeta: document.querySelector<HTMLElement>('#insight-peak-meta'),
+    seat: document.querySelector<HTMLElement>('#insight-seat'),
+    seatMeta: document.querySelector<HTMLElement>('#insight-seat-meta')
+  }
 };
 
 const state: {
@@ -277,11 +322,22 @@ const state: {
   leaderboard: LeaderboardEntry[];
   lang: Lang;
   lastSnapshot?: MetricSnapshot;
+  identity: {
+    ip: string;
+    seat: string;
+    file: string;
+  };
+  peakRecord?: { rps: number; at: number; tag: string };
 } = {
   level: 'low',
   leaderboard: [],
   lang: (localStorage.getItem('lang') as Lang) === 'en' ? 'en' : 'ko',
-  name: localStorage.getItem('nickname') || 'Guest'
+  name: localStorage.getItem('nickname') || 'Guest',
+  identity: {
+    ip: localStorage.getItem('ipTag') || '',
+    seat: localStorage.getItem('seatTag') || '',
+    file: localStorage.getItem('fileTag') || ''
+  }
 };
 
 const dict = () => translations[state.lang];
@@ -289,6 +345,16 @@ const dict = () => translations[state.lang];
 function setText(id: string, value: string) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function buildIdentityLabel() {
+  const parts = [];
+  if (state.identity.ip) parts.push(`IP ${state.identity.ip}`);
+  if (state.identity.seat) parts.push(`Seat ${state.identity.seat}`);
+  if (state.identity.file) parts.push(state.identity.file);
+  if (state.name) parts.push(state.name);
+  const label = parts.join(' | ').trim();
+  return label || 'Guest';
 }
 
 function setupHelpTips() {
@@ -319,6 +385,7 @@ function applyLanguage(lang: Lang) {
 
   setText('nav-dashboard', d.navDashboard);
   setText('nav-identity', d.navIdentity);
+  setText('nav-insights', d.navInsights);
   setText('nav-leaderboard', d.navLeaderboard);
   setText('hero-title', d.heroTitle);
   setText('hero-lede', d.heroLede);
@@ -351,16 +418,28 @@ function applyLanguage(lang: Lang) {
   setText('profile-title', d.profileTitle);
   setText('step-overload', d.stepOverload);
   setText('tag-live', d.tagLive);
+  setText('insights-title', d.insightsTitle);
+  setText('insights-sub', d.insightsSub);
+  setText('insight-top-ip-label', d.insightTopIpLabel);
+  setText('insight-top-file-label', d.insightTopFileLabel);
+  setText('insight-peak-label', d.insightPeakLabel);
+  setText('insight-seat-label', d.insightSeatLabel);
   setText('th-rank', lang === 'ko' ? '순위' : 'Rank');
-  setText('th-user', lang === 'ko' ? '사용자' : 'User');
-  setText('th-peak', lang === 'ko' ? '최고 RPS' : 'Peak RPS');
-  setText('th-latency', lang === 'ko' ? '평균 지연' : 'Avg Latency');
-  setText('th-error', lang === 'ko' ? '오류율' : 'Error Rate');
-  setText('th-state', lang === 'ko' ? '서버 상태' : 'Server State');
+  setText('th-user', lang === 'ko' ? 'IP / Seat / File' : 'IP / Seat / File');
+  setText('th-peak', lang === 'ko' ? 'Peak 처리량' : 'Peak throughput');
+  setText('th-latency', lang === 'ko' ? '평균 지연' : 'Avg latency');
+  setText('th-error', lang === 'ko' ? '오류율' : 'Error rate');
+  setText('th-state', lang === 'ko' ? '서버 상태' : 'Server state');
   setText('th-stability', lang === 'ko' ? '안정성' : 'Stability');
 
   const nameInput = document.getElementById('name-input') as HTMLInputElement | null;
+  const ipInput = document.getElementById('ip-input') as HTMLInputElement | null;
+  const seatInput = document.getElementById('seat-input') as HTMLInputElement | null;
+  const fileInput = document.getElementById('file-input') as HTMLInputElement | null;
   if (nameInput) nameInput.placeholder = d.namePlaceholder;
+  if (ipInput) ipInput.placeholder = d.ipPlaceholder;
+  if (seatInput) seatInput.placeholder = d.seatPlaceholder;
+  if (fileInput) fileInput.placeholder = d.filePlaceholder;
   const nameBtn = document.getElementById('name-save-btn');
   if (nameBtn) nameBtn.textContent = lang === 'ko' ? '저장' : 'Save';
 
@@ -368,13 +447,13 @@ function applyLanguage(lang: Lang) {
     const level = btn.dataset.level as LoadLevel;
     switch (level) {
       case 'low':
-        btn.textContent = lang === 'ko' ? 'Low 부하' : 'Low Load';
+        btn.textContent = lang === 'ko' ? 'Warm-up' : 'Warm-up';
         break;
       case 'normal':
-        btn.textContent = lang === 'ko' ? 'Normal 부하' : 'Normal Load';
+        btn.textContent = lang === 'ko' ? '정상 업로드' : 'Normal upload';
         break;
       case 'peak':
-        btn.textContent = lang === 'ko' ? 'Peak 부하' : 'Peak Load';
+        btn.textContent = lang === 'ko' ? 'Peak 업로드' : 'Peak upload';
         break;
       case 'overload':
         btn.textContent = lang === 'ko' ? d.overloadButton : d.overloadButton;
@@ -408,6 +487,32 @@ function setWarning(message?: string, opts?: { prefix?: boolean }) {
   els.warning.hidden = false;
   const usePrefix = opts?.prefix ?? true;
   els.warning.textContent = usePrefix ? `${dict().warningPrefix}${message}` : message;
+}
+
+function parseLabelSegments(label: string) {
+  const parts = label.split('|').map((p) => p.trim()).filter(Boolean);
+  const ip =
+    parts.find((p) => /^ip\b/i.test(p))?.replace(/^ip\b[:\s]*/i, '') ||
+    parts.find((p) => /^\d{1,3}(\.\d{1,3}){3}/.test(p)) ||
+    parts[0] ||
+    '';
+  const seat =
+    parts.find((p) => /(seat|좌석|조)/i.test(p))?.replace(/^(seat|좌석|조)\b[:\s]*/i, '') ||
+    parts.find((p) => /desk|row|lab/i.test(p)) ||
+    '';
+  const file =
+    parts.find((p) => /(zip|tar|iso|msi|pkg|exe|apk|img|bin|file|패키지|파일)/i.test(p)) ||
+    (parts.length > 1 ? parts[parts.length - 1] : '') ||
+    '';
+  return { ip: ip || '', seat: seat || '', file: file || '' };
+}
+
+function formatClock(timestamp: number) {
+  return new Date(timestamp).toLocaleTimeString(state.lang === 'ko' ? 'ko-KR' : 'en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
 }
 
 function renderProfileInfo(snapshot: MetricSnapshot) {
@@ -467,6 +572,73 @@ function renderProfileInfo(snapshot: MetricSnapshot) {
       state.lang === 'ko'
         ? `RAM 실사용 ${snapshot.memoryMb}MB / ${total}MB, 여유 ${headroom.toFixed(0)}MB`
         : `RAM usage ${snapshot.memoryMb}MB / ${total}MB, headroom ${headroom.toFixed(0)}MB`;
+  }
+}
+
+function updatePeakRecord(snapshot: MetricSnapshot, label: string) {
+  if (!state.peakRecord || snapshot.rps > state.peakRecord.rps) {
+    state.peakRecord = { rps: snapshot.rps, at: snapshot.timestamp, tag: label };
+  }
+}
+
+function renderInsights(entries: LeaderboardEntry[]) {
+  if (!els.insights) return;
+  const waiting = state.lang === 'ko' ? '데이터 수집 중...' : 'Collecting data...';
+  const noFile = state.lang === 'ko' ? '업로드 로그 동기화 대기' : 'Waiting for upload log';
+  const top = entries[0];
+  const recent = [...entries].sort((a, b) => b.updatedAt - a.updatedAt)[0];
+
+  if (els.insights.topIp && els.insights.topIpMeta) {
+    if (top) {
+      const tag = parseLabelSegments(top.name);
+      els.insights.topIp.textContent = tag.ip || top.name;
+      els.insights.topIpMeta.textContent = `${top.peakRps.toFixed(1)} req/s · ${top.serverState}`;
+    } else {
+      els.insights.topIp.textContent = '--';
+      els.insights.topIpMeta.textContent = waiting;
+    }
+  }
+
+  if (els.insights.topFile && els.insights.topFileMeta) {
+    if (top) {
+      const tag = parseLabelSegments(top.name);
+      const label = tag.file || noFile;
+      els.insights.topFile.textContent = label;
+      const meta = tag.ip || tag.seat || top.name;
+      els.insights.topFileMeta.textContent = meta;
+    } else {
+      els.insights.topFile.textContent = '--';
+      els.insights.topFileMeta.textContent = noFile;
+    }
+  }
+
+  if (els.insights.peakRps && els.insights.peakMeta) {
+    if (state.peakRecord) {
+      els.insights.peakRps.textContent = `${state.peakRecord.rps.toFixed(1)} req/s`;
+      els.insights.peakMeta.textContent =
+        (state.lang === 'ko' ? '기록: ' : 'Recorded ') + formatClock(state.peakRecord.at);
+    } else if (state.lastSnapshot) {
+      els.insights.peakRps.textContent = `${state.lastSnapshot.rps.toFixed(1)} req/s`;
+      els.insights.peakMeta.textContent = formatClock(state.lastSnapshot.timestamp);
+    } else {
+      els.insights.peakRps.textContent = '-- req/s';
+      els.insights.peakMeta.textContent = waiting;
+    }
+  }
+
+  if (els.insights.seat && els.insights.seatMeta) {
+    if (recent) {
+      const tag = parseLabelSegments(recent.name);
+      els.insights.seat.textContent = tag.seat || recent.name;
+      const meta =
+        (state.lang === 'ko' ? '업데이트: ' : 'Updated ') +
+        formatClock(recent.updatedAt) +
+        (recent.serverState ? ` · ${recent.serverState}` : '');
+      els.insights.seatMeta.textContent = meta;
+    } else {
+      els.insights.seat.textContent = '--';
+      els.insights.seatMeta.textContent = waiting;
+    }
   }
 }
 
@@ -613,14 +785,17 @@ function formatLabel(timestamp: number) {
 
 async function refreshMetrics() {
   try {
-    const res = await fetch(`/api/metrics?name=${encodeURIComponent(state.name || 'Guest')}`);
+    const identityLabel = buildIdentityLabel();
+    const res = await fetch(`/api/metrics?name=${encodeURIComponent(identityLabel)}`);
     if (!res.ok) throw new Error('metrics fetch failed');
     const snapshot = (await res.json()) as MetricSnapshot;
     state.lastSnapshot = snapshot;
+    updatePeakRecord(snapshot, identityLabel);
 
     updateCards(snapshot);
     renderProfileInfo(snapshot);
     setWarning(snapshot.warning);
+    renderInsights(state.leaderboard);
 
     if (state.charts) {
       pushData(state.charts.rpsChart, formatLabel(snapshot.timestamp), [snapshot.rps, snapshot.responseTimeMs]);
@@ -660,6 +835,7 @@ function renderLeaderboard(entries: LeaderboardEntry[]) {
   if (!els.leaderboardBody) return;
   if (!entries.length) {
     els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">${dict().leaderboardEmpty}</td></tr>`;
+    renderInsights(entries);
     return;
   }
 
@@ -683,6 +859,7 @@ function renderLeaderboard(entries: LeaderboardEntry[]) {
     .join('');
 
   els.leaderboardBody.innerHTML = rows;
+  renderInsights(entries);
 }
 
 async function refreshLeaderboard() {
@@ -697,23 +874,42 @@ async function refreshLeaderboard() {
     if (els.leaderboardBody) {
       els.leaderboardBody.innerHTML = `<tr><td colspan="7" class="muted">${dict().leaderboardError}</td></tr>`;
     }
+    renderInsights(state.leaderboard);
   }
 }
 
 function bindIdentityForm() {
   if (!els.identity.form || !els.identity.input) return;
-  els.identity.input.value = state.name;
-  setNameStatus(dict().nameSaved(state.name), 'ok');
+  const { input, seatInput, ipInput, fileInput } = els.identity;
+  input.value = state.name;
+  if (seatInput) seatInput.value = state.identity.seat;
+  if (ipInput) ipInput.value = state.identity.ip;
+  if (fileInput) fileInput.value = state.identity.file;
+  setNameStatus(dict().nameSaved(buildIdentityLabel()), 'ok');
   els.identity.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = els.identity.input!.value.trim();
-    if (name.length < 2) {
+    const name = input.value.trim();
+    const seat = seatInput?.value.trim() || '';
+    const ip = ipInput?.value.trim() || '';
+    const file = fileInput?.value.trim() || '';
+    const labelParts = [ip ? `IP ${ip}` : '', seat ? `Seat ${seat}` : '', file, name].filter(Boolean);
+    const label = labelParts.join(' | ');
+    if (label.length < 2) {
       setNameStatus(dict().nameTooShort, 'error');
       return;
     }
-    state.name = name.slice(0, 32);
+    state.name = name.slice(0, 32) || 'Guest';
+    state.identity = {
+      seat: seat.slice(0, 32),
+      ip: ip.slice(0, 64),
+      file: file.slice(0, 64)
+    };
     localStorage.setItem('nickname', state.name);
-    setNameStatus(dict().nameSaved(state.name), 'ok');
+    localStorage.setItem('seatTag', state.identity.seat);
+    localStorage.setItem('ipTag', state.identity.ip);
+    localStorage.setItem('fileTag', state.identity.file);
+    setNameStatus(dict().nameSaved(label), 'ok');
+    renderInsights(state.leaderboard);
   });
 }
 
@@ -729,6 +925,7 @@ function init() {
   bindControls();
   bindLanguageSwitch();
   bindIdentityForm();
+  renderInsights(state.leaderboard);
   startPolling();
   startLeaderboardPolling();
 }

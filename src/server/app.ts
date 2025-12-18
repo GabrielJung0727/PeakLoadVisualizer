@@ -1,12 +1,25 @@
 import express from 'express';
+import http from 'http';
 import path from 'path';
 import cors from 'cors';
+import { WebSocketServer } from 'ws';
 import { collectMetrics, MetricSnapshot, recordRequest } from './metrics';
 import { loadManager } from './loadManager';
 import { LoadLevel } from './types';
+import {
+  getRecentLogs,
+  setStage as setAttackStage,
+  startDdos,
+  stopDdos,
+  subscribeSim,
+  triggerBruteforce,
+  triggerPortScan,
+  triggerSqlInjection
+} from './attackSim';
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
+const server = http.createServer(app);
 const publicDir = path.join(process.cwd(), 'public');
 const clientDir = path.join(process.cwd(), 'src/client');
 const docsFile = path.join(clientDir, 'docs.html');
@@ -152,6 +165,36 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });
 });
 
+// Attack simulation routes (virtual only)
+app.post('/attack/ddos/start', (_req, res) => {
+  startDdos();
+  setAttackStage(currentLoad);
+  res.json({ ok: true });
+});
+app.post('/attack/ddos/stop', (_req, res) => {
+  stopDdos();
+  setAttackStage(currentLoad);
+  res.json({ ok: true });
+});
+app.post('/attack/bruteforce/run', (_req, res) => {
+  triggerBruteforce();
+  setAttackStage(currentLoad);
+  res.json({ ok: true });
+});
+app.post('/attack/portscan/run', (_req, res) => {
+  triggerPortScan();
+  setAttackStage(currentLoad);
+  res.json({ ok: true });
+});
+app.post('/attack/sqlinj/run', (_req, res) => {
+  triggerSqlInjection();
+  setAttackStage(currentLoad);
+  res.json({ ok: true });
+});
+app.get('/logs/recent', (_req, res) => {
+  res.json({ logs: getRecentLogs() });
+});
+
 app.get('/docs.html', (_req, res) => {
   res.sendFile(docsFile);
 });
@@ -160,6 +203,18 @@ app.get('*', (_req, res) => {
   res.sendFile(path.join(clientDir, 'index.html'));
 });
 
-app.listen(port, () => {
+// WebSocket
+const wss = new WebSocketServer({ server, path: '/ws' });
+wss.on('connection', (socket) => {
+  socket.send(JSON.stringify({ kind: 'hello', ts: Date.now() }));
+  const unsubscribe = subscribeSim((event) => {
+    if (socket.readyState === socket.OPEN) {
+      socket.send(JSON.stringify(event));
+    }
+  });
+  socket.on('close', unsubscribe);
+});
+
+server.listen(port, () => {
   console.log(`Load demo server running on http://localhost:${port}`);
 });

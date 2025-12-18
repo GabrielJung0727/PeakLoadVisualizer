@@ -4,12 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const http_1 = __importDefault(require("http"));
 const path_1 = __importDefault(require("path"));
 const cors_1 = __importDefault(require("cors"));
+const ws_1 = require("ws");
 const metrics_1 = require("./metrics");
 const loadManager_1 = require("./loadManager");
+const attackSim_1 = require("./attackSim");
 const app = (0, express_1.default)();
 const port = Number(process.env.PORT) || 3000;
+const server = http_1.default.createServer(app);
 const publicDir = path_1.default.join(process.cwd(), 'public');
 const clientDir = path_1.default.join(process.cwd(), 'src/client');
 const docsFile = path_1.default.join(clientDir, 'docs.html');
@@ -134,12 +138,52 @@ app.post('/api/load/:level', (req, res) => {
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', level: currentLoad, timestamp: Date.now() });
 });
+// Attack simulation routes (virtual only)
+app.post('/attack/ddos/start', (_req, res) => {
+    (0, attackSim_1.startDdos)();
+    (0, attackSim_1.setStage)(currentLoad);
+    res.json({ ok: true });
+});
+app.post('/attack/ddos/stop', (_req, res) => {
+    (0, attackSim_1.stopDdos)();
+    (0, attackSim_1.setStage)(currentLoad);
+    res.json({ ok: true });
+});
+app.post('/attack/bruteforce/run', (_req, res) => {
+    (0, attackSim_1.triggerBruteforce)();
+    (0, attackSim_1.setStage)(currentLoad);
+    res.json({ ok: true });
+});
+app.post('/attack/portscan/run', (_req, res) => {
+    (0, attackSim_1.triggerPortScan)();
+    (0, attackSim_1.setStage)(currentLoad);
+    res.json({ ok: true });
+});
+app.post('/attack/sqlinj/run', (_req, res) => {
+    (0, attackSim_1.triggerSqlInjection)();
+    (0, attackSim_1.setStage)(currentLoad);
+    res.json({ ok: true });
+});
+app.get('/logs/recent', (_req, res) => {
+    res.json({ logs: (0, attackSim_1.getRecentLogs)() });
+});
 app.get('/docs.html', (_req, res) => {
     res.sendFile(docsFile);
 });
 app.get('*', (_req, res) => {
     res.sendFile(path_1.default.join(clientDir, 'index.html'));
 });
-app.listen(port, () => {
+// WebSocket
+const wss = new ws_1.WebSocketServer({ server, path: '/ws' });
+wss.on('connection', (socket) => {
+    socket.send(JSON.stringify({ kind: 'hello', ts: Date.now() }));
+    const unsubscribe = (0, attackSim_1.subscribeSim)((event) => {
+        if (socket.readyState === socket.OPEN) {
+            socket.send(JSON.stringify(event));
+        }
+    });
+    socket.on('close', unsubscribe);
+});
+server.listen(port, () => {
     console.log(`Load demo server running on http://localhost:${port}`);
 });

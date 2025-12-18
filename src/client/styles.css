@@ -407,7 +407,8 @@ body {
   border-radius: 12px;
   padding: 10px 12px;
   color: var(--text);
-  min-width: 220px;
+  min-width: 180px;
+  flex: 1;
 }
 
 .name-form input:focus {
@@ -421,6 +422,33 @@ body {
 
 .leaderboard {
   gap: 12px;
+}
+
+.panel--insights {
+  align-items: center;
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.insight-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 124px;
+  box-shadow: var(--shadow);
+}
+
+.insight-card .value {
+  font-size: 22px;
+}
+
+.insight-card .muted {
+  margin: 6px 0 0;
 }
 
 .leaderboard__head {
@@ -515,5 +543,12 @@ tbody tr:hover {
   }
   .hero__actions {
     flex-wrap: wrap;
+  }
+  .name-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .insight-grid {
+    grid-template-columns: 1fr;
   }
 }

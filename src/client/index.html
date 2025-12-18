@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Windows Server 2016 동적 부하 데모</title>
+    <title>Peak FTP Observatory</title>
     <link rel="stylesheet" href="/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script type="module" src="/assets/main.js" defer></script>
@@ -12,11 +12,12 @@
     <nav class="topbar">
       <div class="topbar__brand">
         <span class="dot"></span>
-        <strong>Win2016 Load Lab</strong>
+        <strong>Peak FTP Observatory</strong>
       </div>
       <div class="topbar__links">
         <a id="nav-dashboard" href="#dashboard">대시보드</a>
         <a id="nav-identity" href="#identity">닉네임 설정</a>
+        <a id="nav-insights" href="#insights">업로드 통계</a>
         <a id="nav-leaderboard" href="#leaderboard">리더보드</a>
       </div>
       <div class="topbar__langs">
@@ -27,26 +28,26 @@
     <header class="hero">
       <div class="hero__text">
         <p class="eyebrow">
-          Windows Server 2016
+          금요일 FTP 업로드 관제
           <span class="help-wrap"><button class="help" data-help-key="windows">?</button><span class="help-tooltip"></span></span>
-          · VMware
+          · 실습 좌석별 트래픽
           <span class="help-wrap"><button class="help" data-help-key="vmware">?</button><span class="help-tooltip"></span></span>
-          · TS
+          · Peak 탐지
           <span class="help-wrap"><button class="help" data-help-key="ts">?</button><span class="help-tooltip"></span></span>
         </p>
-        <h1 id="hero-title">동적 부하 처리 웹서비스 &amp; Peak 성능 분석</h1>
+        <h1 id="hero-title">FTP 업로드 성능 · 좌석/IP별 분석</h1>
         <p class="lede" id="hero-lede">
-          요청량을 단계별로 올리며 RPS, CPU, 메모리, 응답 시간, 오류율을 한눈에 살피는 발표형 대시보드.
-          후배/수강생이 직접 버튼을 눌러 부하 변화를 체험할 수 있습니다.
+          금요일 실습 때 학생들이 FTP로 올린 파일이 어느 IP/좌석에서 가장 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 많이 먹었는지 한눈에 보여주는 관제형 대시보드입니다.
+          서버에서 실행하며, 업로드 시점의 처리량·지연·오류율을 실시간으로 수집합니다.
         </p>
         <div class="hero__actions">
-          <button class="pill active" data-level="low">Low 부하</button>
-          <button class="pill" data-level="normal">Normal 부하</button>
-          <button class="pill" data-level="peak">Peak 부하</button>
-          <button class="pill pill--alert" data-level="overload">Overload</button>
+          <button class="pill active" data-level="low">Warm-up</button>
+          <button class="pill" data-level="normal">정상 업로드</button>
+          <button class="pill" data-level="peak">Peak 업로드</button>
+          <button class="pill pill--alert" data-level="overload">과부하 테스트</button>
         </div>
         <p class="note" id="hero-note">
-          IIS 또는 Node.js(Express) 서버 + k6/AB/JMeter 연동 가능
+          IIS/Node.js 위에 FTP 로그·업로드 이벤트를 붙여서 실시간으로 처리량, 파일 크기, 좌석별 IP를 기록합니다.
           <span class="help-wrap"><button class="help" data-help-key="webserver">?</button><span class="help-tooltip"></span></span>
         </p>
       </div>
@@ -54,7 +55,7 @@
         <div class="status-chip" id="stage-chip">현재 단계: Low</div>
         <div class="highlight">
           <h3 id="highlight-title">
-            Peak 대비 상태
+            금요일 업로드 모니터
             <span class="help-wrap"><button class="help" data-help-key="scalability">?</button><span class="help-tooltip"></span></span>
           </h3>
           <p class="highlight__value" id="rps-highlight">-- req/s</p>
@@ -84,16 +85,16 @@
 
       <section class="panel panel--spec" id="spec">
         <div>
-          <h3 id="spec-title">Windows Server 2016 · 실시간 계측</h3>
-          <p class="sub" id="spec-sub">Task Manager/PerfMon과 동일한 CPU·메모리·디스크 IO 값을 실시간으로 보여줍니다.</p>
+          <h3 id="spec-title">FTP 업로드 · 실시간 계측</h3>
+          <p class="sub" id="spec-sub">업로드 순간의 CPU·메모리·디스크 IO를 즉시 읽어 좌석/IP 로그와 함께 저장합니다.</p>
           <ul class="spec-list">
             <li id="spec-ram">RAM 실시간 사용/여유 표시.</li>
             <li id="spec-disk">디스크 IO(R/W MB/s) 실시간 표시.</li>
-            <li id="spec-io">IIS/Express 공용, VM 내부 실측값.</li>
+            <li id="spec-io">업로드 이벤트와 함께 서버 내부 계측값을 동기화.</li>
           </ul>
         </div>
         <div class="legend">
-          <p class="legend__title" id="profile-title">실시간 시스템 상태</p>
+          <p class="legend__title" id="profile-title">라이브 업로드 상태</p>
           <ul class="profile-list">
             <li id="profile-cpu">CPU: --</li>
             <li id="profile-mem">메모리: --</li>
@@ -108,14 +109,14 @@
       <section class="grid">
         <article class="card">
           <p class="label">
-            RPS
+            업로드 처리량
             <span class="help-wrap"><button class="help" data-help-key="rps">?</button><span class="help-tooltip"></span></span>
           </p>
           <p class="value" id="card-rps">-- req/s</p>
         </article>
         <article class="card">
           <p class="label">
-            응답 시간
+            업로드 지연
             <span class="help-wrap"><button class="help" data-help-key="latency">?</button><span class="help-tooltip"></span></span>
           </p>
           <p class="value" id="card-latency">-- ms</p>
@@ -149,13 +150,16 @@
 
       <section class="panel" id="identity">
         <div>
-          <h3 id="identity-title">닉네임 설정 (일시적)</h3>
+          <h3 id="identity-title">업로드 태그 설정 (IP/좌석/파일)</h3>
           <p class="sub" id="identity-sub">
-            세션 동안 사용할 닉네임을 정하면 리더보드에 기록됩니다. IP/계정 저장 없이 브라우저에만 임시 보관합니다.
+            업로드를 보낸 IP, 좌석번호, 업로드한 파일명(또는 패키지)을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장합니다.
             <span class="help-wrap"><button class="help" data-help-key="webclient">?</button><span class="help-tooltip"></span></span>
           </p>
           <form id="name-form" class="name-form">
-            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
+            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: 10.0.0.12" />
+            <input id="seat-input" name="seat" type="text" minlength="1" maxlength="32" placeholder="좌석/조" />
+            <input id="ip-input" name="ip" type="text" minlength="2" maxlength="64" placeholder="FTP IP (실제)" />
+            <input id="file-input" name="file" type="text" minlength="2" maxlength="64" placeholder="업로드한 파일/패키지" />
             <button type="submit" class="pill" id="name-save-btn">저장</button>
             <span class="name-status" id="name-status"></span>
           </form>
@@ -163,10 +167,39 @@
         <div class="legend">
           <p class="legend__title" id="identity-legend-title">기록 방식</p>
           <ul>
-            <li id="identity-legend-1">최근 15초 이동창으로 RPS/지연/오류율 계산</li>
-            <li id="identity-legend-2">CPU/메모리 실측(`systeminformation`) 반영</li>
-            <li id="identity-legend-3">최고 RPS, 최저 평균 지연, 최소 오류율, 안정성 점수 저장</li>
+            <li id="identity-legend-1">업로드 시각·IP/좌석/파일 태그를 함께 기록</li>
+            <li id="identity-legend-2">CPU/메모리 실측값을 업로드 이벤트와 함께 저장</li>
+            <li id="identity-legend-3">최고 처리량, 최저 지연, 오류율, 안정성 점수를 추적</li>
           </ul>
+        </div>
+      </section>
+
+      <section class="panel panel--insights" id="insights">
+        <div>
+          <h3 id="insights-title">업로드 통계 스냅샷</h3>
+          <p class="sub" id="insights-sub">금요일 업로드에서 가장 뜨거운 IP, 좌석, 파일과 Peak 처리량을 바로 보여줍니다.</p>
+        </div>
+        <div class="insight-grid">
+          <article class="insight-card">
+            <p class="label" id="insight-top-ip-label">최고 처리량 IP</p>
+            <p class="value" id="insight-top-ip">--</p>
+            <p class="muted" id="insight-top-ip-meta">데이터 수집 중...</p>
+          </article>
+          <article class="insight-card">
+            <p class="label" id="insight-top-file-label">가장 무거운 파일</p>
+            <p class="value" id="insight-top-file">--</p>
+            <p class="muted" id="insight-top-file-meta">업로드 로그 동기화 대기</p>
+          </article>
+          <article class="insight-card">
+            <p class="label" id="insight-peak-label">최고 처리량 순간</p>
+            <p class="value" id="insight-peak-rps">-- req/s</p>
+            <p class="muted" id="insight-peak-meta">--</p>
+          </article>
+          <article class="insight-card">
+            <p class="label" id="insight-seat-label">가장 바쁜 좌석</p>
+            <p class="value" id="insight-seat">--</p>
+            <p class="muted" id="insight-seat-meta">RPS/지연 기준</p>
+          </article>
         </div>
       </section>
 
@@ -174,8 +207,8 @@
         <div class="chart-card">
           <div class="chart-header">
             <div>
-              <p class="label">요청량 &amp; 응답 시간</p>
-              <h3>RPS vs Response</h3>
+              <p class="label">업로드량 &amp; 지연</p>
+              <h3>Upload Throughput vs Response</h3>
             </div>
             <p class="tag" id="tag-live">
               실시간
@@ -202,18 +235,17 @@
       <section class="panel" id="steps">
         <div>
           <h3 id="steps-title">
-            단계별 부하 실습
+            금요일 업로드 체크리스트
             <span class="help-wrap"><button class="help" data-help-key="loadtest">?</button><span class="help-tooltip"></span></span>
           </h3>
           <p class="sub" id="steps-sub">
-            버튼을 눌러 서버 부하 단계를 전환하면 `/api/load/:level`이 호출되고, `/api/metrics`가 갱신됩니다.
-            실제 발표에서는 k6/AB/JMeter 실행을 여기에 연결할 수 있습니다.
+            FTP 업로드와 함께 `load level`을 전환하면 `/api/load/:level`이 호출되고 `/api/metrics`가 갱신됩니다. 업로드 트래픽·파일을 기록할 때 활용하세요.
           </p>
           <ul class="steps">
-            <li id="step-low">Low: 캐시 워밍업, 정상 지표 확인</li>
-            <li id="step-normal">Normal: 평균 응답 시간과 CPU 안정성 확인</li>
+            <li id="step-low">Warm-up: 베이스라인 RPS/지연 확보</li>
+            <li id="step-normal">Normal: 평균 지연과 CPU 안정성 확인</li>
             <li id="step-peak">
-              Peak: 지연/오류율 상승 시 경고 배너 확인
+              Peak: 업로드 폭주 시 경고 배너 확인
               <span class="help-wrap"><button class="help" data-help-key="peak">?</button><span class="help-tooltip"></span></span>
             </li>
             <li id="step-overload">Overload: 의도적 포화(오류율/지연 급증)</li>
@@ -221,20 +253,20 @@
         </div>
         <div class="legend">
           <p class="legend__title" id="monitor-title">
-            모니터링 포인트
+            모니터링 포인트 (FTP/HTTP)
             <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
           </p>
           <ul>
             <li id="monitor-1">
-              Performance Monitor: % Processor Time, Available MBytes
+              업로드 로그: IP·좌석·파일명과 타임스탬프
               <span class="help-wrap"><button class="help" data-help-key="perfmon">?</button><span class="help-tooltip"></span></span>
             </li>
             <li id="monitor-2">
-              로드툴: k6/AB/JMeter 결과와 그래프 비교
+              시스템 계측: CPU/메모리/디스크 IO
               <span class="help-wrap"><button class="help" data-help-key="loadtest">?</button><span class="help-tooltip"></span></span>
             </li>
             <li id="monitor-3">
-              Task Manager 캡처로 실시간 리소스 공유
+              Peak 알람: 지연·오류율 증가 시 경고 배너 확인
               <span class="help-wrap"><button class="help" data-help-key="taskmgr">?</button><span class="help-tooltip"></span></span>
             </li>
           </ul>
@@ -248,8 +280,8 @@
               Leaderboard
               <span class="help-wrap"><button class="help" data-help-key="leaderboard">?</button><span class="help-tooltip"></span></span>
             </p>
-            <h3 id="leaderboard-title">실시간 성능 순위</h3>
-            <p class="sub" id="leaderboard-sub">최고 RPS, 최저 평균 응답 시간, 오류율, 안정성 점수로 순위를 매깁니다.</p>
+            <h3 id="leaderboard-title">IP/파일별 업로드 순위</h3>
+            <p class="sub" id="leaderboard-sub">IP·좌석·파일 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.</p>
           </div>
           <div class="badge-set">
             <span class="badge">Peak Breaker</span>
@@ -262,12 +294,12 @@
             <thead>
               <tr>
                 <th id="th-rank">Rank</th>
-                <th id="th-user">User</th>
-                <th id="th-peak">Peak RPS</th>
-                <th id="th-latency">Avg Latency</th>
-                <th id="th-error">Error Rate</th>
-                <th id="th-state">Server State</th>
-                <th id="th-stability">Stability</th>
+                <th id="th-user">IP / 좌석 / 파일</th>
+                <th id="th-peak">Peak 처리량</th>
+                <th id="th-latency">평균 지연</th>
+                <th id="th-error">오류율</th>
+                <th id="th-state">서버 상태</th>
+                <th id="th-stability">안정성</th>
               </tr>
             </thead>
             <tbody id="leaderboard-body">
@@ -281,6 +313,7 @@
       <div class="footer__links">
         <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a>
         <a href="/docs.html" target="_blank" rel="noopener">Docs</a>
+        <a href="/service.html" target="_blank" rel="noopener">CyberAttack Sim</a>
       </div>
       <p class="muted">Windows Server 2016 · Load Lab</p>
     </footer>

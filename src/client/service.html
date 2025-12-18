@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberAttack Simulation · Win2016</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script type="module" src="/assets/service.js" defer></script>
+    <style>
+      :root {
+        --panel: rgba(255, 255, 255, 0.06);
+        --glass: rgba(255, 255, 255, 0.04);
+        --warn: #ffb347;
+        --alert: #ff6384;
+        --ok: #5dd5c4;
+      }
+      body {
+        margin: 0;
+        font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at 20% 20%, rgba(93, 213, 196, 0.12), transparent 30%),
+          radial-gradient(circle at 80% 0%, rgba(255, 99, 132, 0.12), transparent 28%),
+          #050912;
+      }
+      .shell {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 20px 22px 32px;
+      }
+      header {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--glass);
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+      }
+      h1 {
+        margin: 4px 0 0;
+        font-size: 28px;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .pill {
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .pill:hover {
+        background: linear-gradient(120deg, var(--accent), var(--accent-2));
+        color: #0b1226;
+        border-color: transparent;
+      }
+      .pill.active {
+        background: linear-gradient(120deg, #ff6384, #ffb347);
+        color: #0b1226;
+        border-color: transparent;
+        box-shadow: 0 0 16px rgba(255, 99, 132, 0.4);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--panel);
+        padding: 14px;
+        box-shadow: var(--shadow);
+      }
+      .card h3 {
+        margin: 0 0 6px;
+      }
+      .chart-wrap {
+        height: 220px;
+      }
+      .logs {
+        max-height: 220px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .log {
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--border);
+        font-size: 14px;
+      }
+      .log.ok {
+        border-color: var(--ok);
+      }
+      .log.warn {
+        border-color: var(--warn);
+      }
+      .log.error {
+        border-color: var(--alert);
+      }
+      .viz {
+        position: relative;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: linear-gradient(160deg, rgba(93, 213, 196, 0.08), rgba(255, 99, 132, 0.08));
+        margin-top: 14px;
+        min-height: 320px;
+        overflow: hidden;
+      }
+      .server {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 160px;
+        height: 160px;
+        border-radius: 24px;
+        border: 2px solid var(--border);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        letter-spacing: 1px;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+      }
+      .server.pulse {
+        box-shadow: 0 0 35px rgba(255, 99, 132, 0.6), 0 0 18px rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%) scale(1.02);
+      }
+      .shockwave {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 99, 132, 0.45);
+        transform: translate(-50%, -50%) scale(0.4);
+        opacity: 0.8;
+        animation: wave 0.9s ease-out forwards;
+        pointer-events: none;
+      }
+      @keyframes wave {
+        from {
+          transform: translate(-50%, -50%) scale(0.5);
+          opacity: 0.8;
+        }
+        to {
+          transform: translate(-50%, -50%) scale(2.8);
+          opacity: 0;
+        }
+      }
+      .arrow {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-left: 3px solid var(--alert);
+        border-bottom: 3px solid var(--alert);
+        opacity: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: fly 2.6s ease-out forwards;
+        filter: drop-shadow(0 0 8px rgba(255, 99, 132, 0.7));
+      }
+      .arrow.ddos {
+        border-color: #ff4d6d;
+        filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.8));
+      }
+      .arrow.bruteforce {
+        border-color: #ffb347;
+      }
+      .arrow.portscan {
+        border-color: #5dd5c4;
+      }
+      .arrow.sqlinj {
+        border-color: #c77dff;
+      }
+      .arrow.warn {
+        border-color: var(--warn);
+        animation-duration: 2.2s;
+        filter: drop-shadow(0 0 6px rgba(255, 179, 71, 0.6));
+      }
+      .arrow.ok {
+        border-color: var(--ok);
+        animation-duration: 3.2s;
+        filter: drop-shadow(0 0 6px rgba(93, 213, 196, 0.6));
+      }
+      @keyframes fly {
+        0% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--sx)), calc(-50% + var(--sy))) rotate(-45deg) scale(0.6);
+        }
+        25% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) rotate(-45deg) scale(1.05);
+        }
+      }
+      .status-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .tag {
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.35);
+        font-size: 12px;
+        letter-spacing: 0.4px;
+      }
+      .tag.alert {
+        border-color: var(--alert);
+        color: var(--alert);
+      }
+      .tag.warn {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div>
+          <p class="eyebrow">Windows Server 2016 · CyberAttack Simulation</p>
+          <h1>CyberAttack Dashboard</h1>
+          <p class="sub">DDOS / BruteForce / PortScan / SQLi를 가상으로 시연, 실시간 차트·로그·애니메이션</p>
+        </div>
+        <div class="controls">
+          <button class="pill" data-action="ddos-start">DDOS Start</button>
+          <button class="pill" data-action="ddos-stop">DDOS Stop</button>
+          <button class="pill" data-action="bruteforce">BruteForce</button>
+          <button class="pill" data-action="portscan">PortScan</button>
+          <button class="pill" data-action="sqlinj">SQLi</button>
+          <span class="tag" id="stage-tag">Stage: low</span>
+        </div>
+      </header>
+
+      <div class="grid">
+        <div class="card">
+          <h3>CPU Usage</h3>
+          <div class="chart-wrap"><canvas id="cpuChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Network Traffic</h3>
+          <div class="chart-wrap"><canvas id="netChart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Log Stream</h3>
+          <div class="logs" id="logs"></div>
+        </div>
+      </div>
+
+      <div class="viz" id="viz">
+        <div class="server">SERVER</div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Warnings</h3>
+          <div class="status-tags" id="tags"></div>
+        </div>
+        <div class="card">
+          <h3>Recent Activity</h3>
+          <p class="sub">실제 공격 없이, 시뮬레이션된 이벤트를 표시합니다.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
