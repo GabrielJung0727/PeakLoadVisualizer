@@ -22,6 +22,8 @@
         background: radial-gradient(circle at 20% 20%, rgba(93, 213, 196, 0.12), transparent 30%),
           radial-gradient(circle at 80% 0%, rgba(255, 99, 132, 0.12), transparent 28%),
           #050912;
+        background-size: 200% 200%;
+        animation: bg-pan 22s ease infinite;
       }
       .shell {
         max-width: 1280px;
@@ -164,6 +166,17 @@
           opacity: 0;
         }
       }
+      @keyframes bg-pan {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
       .arrow {
         position: absolute;
         width: 14px;
@@ -234,6 +247,18 @@
       .tag.warn {
         border-color: var(--warn);
         color: var(--warn);
+      }
+      @media (max-width: 640px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .viz {
+          min-height: 260px;
+        }
+        .controls {
+          width: 100%;
+        }
       }
     </style>
   </head>

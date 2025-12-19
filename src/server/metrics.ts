@@ -17,6 +17,7 @@ export interface MetricSnapshot {
   memoryHeadroomMb?: number;
   memoryCapacityMb?: number;
   profile?: LoadProfileSnapshot;
+  sessions?: number;
 }
 
 type Sample = { ts: number; durationMs: number; isError: boolean };

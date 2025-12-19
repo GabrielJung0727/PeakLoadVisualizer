@@ -10,80 +10,169 @@
   </head>
   <body>
     <nav class="topbar">
-      <div class="topbar__brand">
-        <span class="dot"></span>
-        <strong>Peak FTP Observatory</strong>
-      </div>
-      <div class="topbar__links">
-        <a id="nav-dashboard" href="#dashboard">대시보드</a>
-        <a id="nav-identity" href="#identity">닉네임 설정</a>
-        <a id="nav-insights" href="#insights">업로드 통계</a>
-        <a id="nav-leaderboard" href="#leaderboard">리더보드</a>
-      </div>
-      <div class="topbar__langs">
-        <button class="lang-btn active" data-lang="ko">한국어</button>
-        <button class="lang-btn" data-lang="en">English</button>
+      <div class="container topbar__inner">
+        <div class="topbar__brand">
+          <span class="dot"></span>
+          <div>
+            <strong>Peak FTP Observatory</strong>
+            <p class="muted topbar__meta">Same-network FTP uploads · IIS / FileZilla / Node</p>
+          </div>
+        </div>
+        <div class="topbar__links">
+          <a id="nav-dashboard" href="#dashboard">대시보드</a>
+          <a id="nav-identity" href="#identity">업로드 태그</a>
+          <a id="nav-insights" href="#insights">업로드 통계</a>
+          <a id="nav-leaderboard" href="#leaderboard">리더보드</a>
+        </div>
+        <div class="topbar__langs">
+          <button class="lang-btn active" data-lang="ko">한국어</button>
+          <button class="lang-btn" data-lang="en">English</button>
+        </div>
       </div>
     </nav>
-    <header class="hero">
-      <div class="hero__text">
-        <p class="eyebrow">
-          금요일 FTP 업로드 관제
-          <span class="help-wrap"><button class="help" data-help-key="windows">?</button><span class="help-tooltip"></span></span>
-          · 실습 트래픽
-          <span class="help-wrap"><button class="help" data-help-key="vmware">?</button><span class="help-tooltip"></span></span>
-          · Peak 탐지
-          <span class="help-wrap"><button class="help" data-help-key="ts">?</button><span class="help-tooltip"></span></span>
-        </p>
-        <h1 id="hero-title">FTP 업로드 성능 · 좌석/파일별 분석</h1>
-        <p class="lede" id="hero-lede">
-          금요일 실습 때 학생들이 FTP로 올린 파일이 어느 좌석에서 높은 처리량을 냈는지, 어떤 파일이 서버 자원을 많이 먹었는지 한눈에 보여주는 관제형 대시보드입니다.
-          서버에서 실행하며, 업로드 시점의 처리량·지연·오류율을 실시간으로 수집합니다.
-        </p>
-        <div class="hero__actions">
-          <button class="pill active" data-level="low">Warm-up</button>
-          <button class="pill" data-level="normal">정상 업로드</button>
-          <button class="pill" data-level="peak">Peak 업로드</button>
-          <button class="pill pill--alert" data-level="overload">과부하 테스트</button>
-        </div>
-        <p class="note" id="hero-note">
-          IIS/Node.js 위에 FTP 로그·업로드 이벤트를 붙여서 실시간으로 처리량, 파일 크기, 좌석별 IP를 기록합니다.
-          <span class="help-wrap"><button class="help" data-help-key="webserver">?</button><span class="help-tooltip"></span></span>
-        </p>
-      </div>
-      <div class="hero__panel">
-        <div class="status-chip" id="stage-chip">현재 단계: Low</div>
-        <div class="highlight">
-          <h3 id="highlight-title">
-            금요일 업로드 모니터
-            <span class="help-wrap"><button class="help" data-help-key="scalability">?</button><span class="help-tooltip"></span></span>
-          </h3>
-          <p class="highlight__value" id="rps-highlight">-- req/s</p>
-          <p class="sub" id="highlight-sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
-          <div class="mini-grid">
-            <div>
-              <p class="label">
-                CPU
-                <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
-              </p>
-              <p class="metric" id="cpu-highlight">--%</p>
+
+    <main class="page" id="dashboard">
+      <header class="hero">
+        <div class="container hero__wrap">
+          <div class="hero__text">
+            <p class="eyebrow">
+              금요일 FTP 업로드 관제
+              <span class="help-wrap"><button class="help" data-help-key="windows">?</button><span class="help-tooltip"></span></span>
+              · 실습 트래픽
+              <span class="help-wrap"><button class="help" data-help-key="vmware">?</button><span class="help-tooltip"></span></span>
+              · Peak 탐지
+              <span class="help-wrap"><button class="help" data-help-key="ts">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <h1 id="hero-title">FTP 업로드 성능 · 좌석/파일별 분석</h1>
+            <p class="lede" id="hero-lede">
+              같은 네트워크 안에서 접속한 사용자의 아이디피(IP)를 자동으로 기록하고, FTP 업로드·지연·오류율·CPU/메모리까지 모두 좌석/파일 태그와 함께 관제합니다.
+              서버에서 실행하며 업로드 시점의 처리량을 실시간으로 수집합니다.
+            </p>
+            <div class="hero__actions pill-group">
+              <button class="pill active" data-level="low">Warm-up</button>
+              <button class="pill" data-level="normal">정상 업로드</button>
+              <button class="pill" data-level="peak">Peak 업로드</button>
+              <button class="pill pill--alert" data-level="overload">과부하 테스트</button>
             </div>
-            <div>
-              <p class="label">
-                메모리
-                <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
-              </p>
-              <p class="metric" id="memory-highlight">-- MB</p>
+            <p class="note" id="hero-note">
+              IIS/Node.js 위에 FTP 로그·업로드 이벤트를 붙여서 실시간으로 처리량, 파일 크기, 좌석별 성능을 기록합니다.
+              <span class="help-wrap"><button class="help" data-help-key="webserver">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <div class="status-rail">
+              <span class="chip chip--accent" id="stage-chip">현재 단계: Low</span>
+              <span class="chip chip--ghost" id="client-ip">IP 확인 중...</span>
+              <span class="chip">실시간 폴링 2s</span>
+            </div>
+          </div>
+          <div class="hero__panel glass">
+            <div class="highlight">
+              <div class="highlight__head">
+                <div>
+                  <p class="label" id="highlight-title">
+                    금요일 업로드 모니터
+                    <span class="help-wrap"><button class="help" data-help-key="scalability">?</button><span class="help-tooltip"></span></span>
+                  </p>
+                  <p class="sub" id="highlight-sub">RPS · 응답 시간 · 오류율을 실시간으로 폴링합니다.</p>
+                </div>
+                <p class="tag tag--glow" id="tag-live">LIVE</p>
+              </div>
+              <p class="highlight__value" id="rps-highlight">-- req/s</p>
+              <div class="mini-grid">
+                <div>
+                  <p class="label">
+                    CPU
+                    <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
+                  </p>
+                  <p class="metric" id="cpu-highlight">--%</p>
+                </div>
+                <div>
+                  <p class="label">
+                    메모리
+                    <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
+                  </p>
+                  <p class="metric" id="memory-highlight">-- MB</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <main class="content" id="dashboard">
-      <section class="warning" id="warning" hidden>Peak 단계 경고: 응답 지연/오류 발생</section>
+      <section class="container callouts">
+        <div class="warning" id="warning" hidden>Peak 단계 경고: 응답 지연/오류 발생</div>
+      </section>
 
-      <section class="panel panel--spec" id="spec">
+      <section class="container metrics-grid">
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">
+              업로드 처리량
+              <span class="help-wrap"><button class="help" data-help-key="rps">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">req/s</span>
+          </div>
+          <p class="value" id="card-rps">-- req/s</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">
+              업로드 지연
+              <span class="help-wrap"><button class="help" data-help-key="latency">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">ms</span>
+          </div>
+          <p class="value" id="card-latency">-- ms</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">
+              CPU
+              <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">live</span>
+          </div>
+          <p class="value" id="card-cpu">--%</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">
+              메모리
+              <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">MB</span>
+          </div>
+          <p class="value" id="card-memory">-- MB</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">
+              오류율
+              <span class="help-wrap"><button class="help" data-help-key="errorRate">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">%</span>
+          </div>
+          <p class="value" id="card-error">--%</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label" id="session-label">
+              동시 접속(추정)
+              <span class="help-wrap"><button class="help" data-help-key="concurrency">?</button><span class="help-tooltip"></span></span>
+            </p>
+            <span class="pill pill--tiny">sessions</span>
+          </div>
+          <p class="value" id="card-sessions">--</p>
+        </article>
+        <article class="card card--metric">
+          <div class="card__meta">
+            <p class="label">활성 단계</p>
+            <span class="pill pill--tiny">stage</span>
+          </div>
+          <p class="value" id="card-stage">Low</p>
+        </article>
+      </section>
+
+      <section class="container panel panel--spec glass" id="spec">
         <div>
           <h3 id="spec-title">FTP 업로드 · 실시간 계측</h3>
           <p class="sub" id="spec-sub">업로드 순간의 CPU·메모리·디스크 IO를 즉시 읽어 좌석/IP 로그와 함께 저장합니다.</p>
@@ -106,59 +195,16 @@
         </div>
       </section>
 
-      <section class="grid">
-        <article class="card">
-          <p class="label">
-            업로드 처리량
-            <span class="help-wrap"><button class="help" data-help-key="rps">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <p class="value" id="card-rps">-- req/s</p>
-        </article>
-        <article class="card">
-          <p class="label">
-            업로드 지연
-            <span class="help-wrap"><button class="help" data-help-key="latency">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <p class="value" id="card-latency">-- ms</p>
-        </article>
-        <article class="card">
-          <p class="label">
-            CPU
-            <span class="help-wrap"><button class="help" data-help-key="cpu">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <p class="value" id="card-cpu">--%</p>
-        </article>
-        <article class="card">
-          <p class="label">
-            메모리
-            <span class="help-wrap"><button class="help" data-help-key="memory">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <p class="value" id="card-memory">-- MB</p>
-        </article>
-        <article class="card">
-          <p class="label">
-            오류율
-            <span class="help-wrap"><button class="help" data-help-key="errorRate">?</button><span class="help-tooltip"></span></span>
-          </p>
-          <p class="value" id="card-error">--%</p>
-        </article>
-        <article class="card">
-          <p class="label">활성 단계</p>
-          <p class="value" id="card-stage">Low</p>
-        </article>
-      </section>
-
-      <section class="panel" id="identity">
+      <section class="container panel panel--identity glass" id="identity">
         <div>
-          <h3 id="identity-title">업로드 태그 설정 (좌석/파일)</h3>
+          <h3 id="identity-title">IP 기반 접속 태그</h3>
           <p class="sub" id="identity-sub">
-            업로드를 보낸 좌석번호와 파일명(또는 패키지)을 태그로 남기면 리더보드와 분석 카드에 그대로 표시됩니다. 브라우저에만 임시 저장합니다.
+            접속한 IP는 자동으로 기록됩니다. 간단한 메모/태그(선택)를 남기면 리더보드와 인사이트에 표시됩니다. 브라우저에만 임시 저장합니다.
             <span class="help-wrap"><button class="help" data-help-key="webclient">?</button><span class="help-tooltip"></span></span>
           </p>
           <form id="name-form" class="name-form">
-            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: StudentA" />
-            <input id="seat-input" name="seat" type="text" minlength="1" maxlength="32" placeholder="좌석/조" />
-            <input id="file-input" name="file" type="text" minlength="2" maxlength="64" placeholder="업로드한 파일/패키지" />
+            <input id="name-input" name="name" type="text" minlength="2" maxlength="32" placeholder="예: Friday Lab" />
+            <input id="memo-input" name="memo" type="text" minlength="0" maxlength="64" placeholder="메모/태그 (선택)" />
             <button type="submit" class="pill" id="name-save-btn">저장</button>
             <span class="name-status" id="name-status"></span>
           </form>
@@ -166,21 +212,21 @@
         <div class="legend">
           <p class="legend__title" id="identity-legend-title">기록 방식</p>
           <ul>
-            <li id="identity-legend-1">업로드 시각·좌석/파일 태그를 함께 기록</li>
+            <li id="identity-legend-1">접속 IP와 메모 태그를 함께 기록</li>
             <li id="identity-legend-2">CPU/메모리 실측값을 업로드 이벤트와 함께 저장</li>
-            <li id="identity-legend-3">최고 처리량, 최저 지연, 오류율, 안정성 점수를 추적</li>
+            <li id="identity-legend-3">IP별 최고 처리량, 지연, 오류율, 안정성 점수를 추적</li>
           </ul>
         </div>
       </section>
 
-      <section class="panel panel--insights" id="insights">
+      <section class="container panel panel--insights glass" id="insights">
         <div>
           <h3 id="insights-title">업로드 통계 스냅샷</h3>
-          <p class="sub" id="insights-sub">금요일 업로드에서 가장 뜨거운 좌석과 파일, Peak 처리량을 바로 보여줍니다.</p>
+          <p class="sub" id="insights-sub">IP별로 가장 뜨거운 지표와 Peak 처리량을 바로 보여줍니다.</p>
         </div>
         <div class="insight-grid">
           <article class="insight-card">
-            <p class="label" id="insight-top-tag-label">최고 처리량 좌석/태그</p>
+            <p class="label" id="insight-top-tag-label">최고 처리량 IP/태그</p>
             <p class="value" id="insight-top-tag">--</p>
             <p class="muted" id="insight-top-tag-meta">데이터 수집 중...</p>
           </article>
@@ -195,15 +241,37 @@
             <p class="muted" id="insight-peak-meta">--</p>
           </article>
           <article class="insight-card">
-            <p class="label" id="insight-seat-label">가장 바쁜 좌석</p>
+            <p class="label" id="insight-seat-label">가장 바쁜 좌석/IP</p>
             <p class="value" id="insight-seat">--</p>
             <p class="muted" id="insight-seat-meta">RPS/지연 기준</p>
           </article>
         </div>
       </section>
 
-      <section class="charts">
-        <div class="chart-card">
+      <section class="container panel glass" id="ip-log">
+        <div>
+          <h3>IP 접속 로그</h3>
+          <p class="sub">최근 접속한 클라이언트 IP와 시간, 동시 접속 추정치를 표시합니다.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>IP</th>
+                <th>시간</th>
+                <th>메모</th>
+                <th>User Agent</th>
+              </tr>
+            </thead>
+            <tbody id="iplog-body">
+              <tr><td colspan="4" class="muted">데이터 수집 대기 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="container charts charts--dual">
+        <div class="chart-card glass">
           <div class="chart-header">
             <div>
               <p class="label">업로드량 &amp; 지연</p>
@@ -216,7 +284,7 @@
           </div>
           <canvas id="rpsChart" height="130"></canvas>
         </div>
-        <div class="chart-card">
+        <div class="chart-card glass">
           <div class="chart-header">
             <div>
               <p class="label">CPU &amp; 메모리</p>
@@ -231,7 +299,7 @@
         </div>
       </section>
 
-      <section class="panel" id="steps">
+      <section class="container panel glass" id="steps">
         <div>
           <h3 id="steps-title">
             금요일 업로드 체크리스트
@@ -251,12 +319,12 @@
           </ul>
         </div>
         <div class="legend">
-            <p class="legend__title" id="monitor-title">
-              모니터링 포인트 (FTP/HTTP)
-              <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
-            </p>
-            <ul>
-              <li id="monitor-1">
+          <p class="legend__title" id="monitor-title">
+            모니터링 포인트 (FTP/HTTP)
+            <span class="help-wrap"><button class="help" data-help-key="stability">?</button><span class="help-tooltip"></span></span>
+          </p>
+          <ul>
+            <li id="monitor-1">
               업로드 로그: 좌석·파일명과 타임스탬프
               <span class="help-wrap"><button class="help" data-help-key="perfmon">?</button><span class="help-tooltip"></span></span>
             </li>
@@ -272,15 +340,15 @@
         </div>
       </section>
 
-      <section class="panel leaderboard" id="leaderboard">
+      <section class="container panel leaderboard glass" id="leaderboard">
         <div class="leaderboard__head">
           <div>
             <p class="label" id="leaderboard-label">
               Leaderboard
               <span class="help-wrap"><button class="help" data-help-key="leaderboard">?</button><span class="help-tooltip"></span></span>
             </p>
-            <h3 id="leaderboard-title">IP/파일별 업로드 순위</h3>
-            <p class="sub" id="leaderboard-sub">IP·좌석·파일 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.</p>
+            <h3 id="leaderboard-title">IP별 업로드 순위</h3>
+            <p class="sub" id="leaderboard-sub">IP 태그별 최고 처리량, 지연, 오류율, 안정성 점수를 집계합니다.</p>
           </div>
           <div class="badge-set">
             <span class="badge">Peak Breaker</span>
@@ -293,7 +361,7 @@
             <thead>
               <tr>
                 <th id="th-rank">Rank</th>
-                <th id="th-user">좌석 / 파일</th>
+                <th id="th-user">IP / 메모</th>
                 <th id="th-peak">Peak 처리량</th>
                 <th id="th-latency">평균 지연</th>
                 <th id="th-error">오류율</th>
@@ -308,13 +376,16 @@
         </div>
       </section>
     </main>
+
     <footer class="footer">
-      <div class="footer__links">
-        <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a>
-        <a href="/docs.html" target="_blank" rel="noopener">Docs</a>
-        <a href="/service.html" target="_blank" rel="noopener">CyberAttack Sim</a>
+      <div class="container footer__inner">
+        <div class="footer__links">
+          <a href="https://github.com/GabrielJung0727/PeakLoadVisualizer" target="_blank" rel="noopener">GitHub</a>
+          <a href="/docs.html" target="_blank" rel="noopener">Docs</a>
+          <a href="/service.html" target="_blank" rel="noopener">CyberAttack Sim</a>
+        </div>
+        <p class="muted">Windows Server 2016 · Load Lab</p>
       </div>
-      <p class="muted">Windows Server 2016 · Load Lab</p>
     </footer>
   </body>
 </html>

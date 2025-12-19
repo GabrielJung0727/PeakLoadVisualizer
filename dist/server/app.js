@@ -18,9 +18,16 @@ const publicDir = path_1.default.join(process.cwd(), 'public');
 const clientDir = path_1.default.join(process.cwd(), 'src/client');
 const docsFile = path_1.default.join(clientDir, 'docs.html');
 let currentLoad = 'low';
+app.set('trust proxy', true);
 const leaderboard = new Map();
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 const DEFAULT_NAME = 'Guest';
+function getClientIp(req) {
+    var _a;
+    const fwd = (_a = req.headers['x-forwarded-for']) === null || _a === void 0 ? void 0 : _a.split(',').map((s) => s.trim()).find(Boolean);
+    const raw = fwd || req.socket.remoteAddress || '';
+    return raw.replace(/^::ffff:/, '') || 'unknown';
+}
 function ensureEntry(name) {
     const key = name || DEFAULT_NAME;
     const existing = leaderboard.get(key);
@@ -67,8 +74,9 @@ function updateLeaderboard(name, snapshot) {
 function extractName(req) {
     const candidate = (req.query.name || req.headers['x-user-name'] || '').toString().trim();
     if (candidate.length >= 2)
-        return candidate.slice(0, 32);
-    return DEFAULT_NAME;
+        return candidate.slice(0, 64);
+    const ip = getClientIp(req);
+    return ip ? `IP ${ip}` : DEFAULT_NAME;
 }
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -76,7 +84,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((req, res, next) => {
     const start = process.hrtime.bigint();
     res.on('finish', () => {
-        const skipPaths = ['/api/metrics', '/api/health'];
+        const skipPaths = ['/api/metrics', '/api/health', '/api/whoami'];
         if (skipPaths.some((prefix) => req.path.startsWith(prefix)))
             return;
         const durationMs = Number(process.hrtime.bigint() - start) / 1000000;
@@ -86,6 +94,10 @@ app.use((req, res, next) => {
 });
 app.use(express_1.default.static(publicDir));
 app.use(express_1.default.static(clientDir));
+app.get('/api/whoami', (req, res) => {
+    const ip = getClientIp(req);
+    res.json({ ip });
+});
 app.get('/api/identity', (_req, res) => {
     res.json({ name: DEFAULT_NAME });
 });
