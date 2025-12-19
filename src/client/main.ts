@@ -362,12 +362,18 @@ function updateIpChip() {
 }
 
 function buildIdentityLabel() {
-  const identity = state.identity || { ip: '', memo: '' };
-  const parts = [];
-  if (identity.ip) parts.push(`IP ${identity.ip}`);
-  if (identity.memo) parts.push(identity.memo);
-  if (state.name) parts.push(state.name);
-  const label = parts.join(' | ').trim();
+  // Trim and guard against missing values so we don't render empty separators
+  const identity = state.identity ?? { ip: '', memo: '' };
+  const ip = (identity.ip || '').trim();
+  const memo = (identity.memo || '').trim();
+  const name = (state.name || '').trim();
+
+  const parts: string[] = [];
+  if (ip) parts.push(`IP ${ip}`);
+  if (memo) parts.push(memo);
+  if (name) parts.push(name);
+
+  const label = parts.join(' | ');
   return label || 'Guest';
 }
 
