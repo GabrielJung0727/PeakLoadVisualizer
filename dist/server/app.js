@@ -20,6 +20,7 @@ const docsFile = path_1.default.join(clientDir, 'docs.html');
 let currentLoad = 'low';
 app.set('trust proxy', true);
 const leaderboard = new Map();
+const ipLogs = [];
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 const DEFAULT_NAME = 'Guest';
 function getClientIp(req) {
@@ -59,6 +60,18 @@ function computeStability(snapshot) {
     const penalty = snapshot.errorRate * 10 + Math.max(snapshot.responseTimeMs - 120, 0) / 6 + Math.max(snapshot.cpu - 75, 0) / 2.5;
     return clamp(Math.round(100 - penalty), 0, 100);
 }
+function recordIpLog(ip, ua, note) {
+    const entry = { ip, ua, ts: Date.now(), note };
+    ipLogs.push(entry);
+    if (ipLogs.length > 300)
+        ipLogs.splice(0, ipLogs.length - 300);
+}
+function recentSessions(windowMs = 120000) {
+    const cutoff = Date.now() - windowMs;
+    const recent = ipLogs.filter((log) => log.ts >= cutoff);
+    const unique = new Set(recent.map((l) => l.ip || 'unknown'));
+    return { count: unique.size, recent };
+}
 function updateLeaderboard(name, snapshot) {
     const entry = ensureEntry(name);
     entry.peakRps = Math.max(entry.peakRps, snapshot.rps);
@@ -84,7 +97,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((req, res, next) => {
     const start = process.hrtime.bigint();
     res.on('finish', () => {
-        const skipPaths = ['/api/metrics', '/api/health', '/api/whoami'];
+        const skipPaths = ['/api/metrics', '/api/health', '/api/whoami', '/api/iplog', '/api/visit'];
         if (skipPaths.some((prefix) => req.path.startsWith(prefix)))
             return;
         const durationMs = Number(process.hrtime.bigint() - start) / 1000000;
@@ -97,6 +110,22 @@ app.use(express_1.default.static(clientDir));
 app.get('/api/whoami', (req, res) => {
     const ip = getClientIp(req);
     res.json({ ip });
+});
+app.post('/api/visit', (req, res) => {
+    var _a;
+    const ip = getClientIp(req);
+    const note = (((_a = req.body) === null || _a === void 0 ? void 0 : _a.note) || '').toString().slice(0, 64);
+    const ua = (req.headers['user-agent'] || '').toString().slice(0, 120);
+    recordIpLog(ip, ua, note);
+    res.json({ ok: true });
+});
+app.get('/api/iplog', (_req, res) => {
+    const { count, recent } = recentSessions();
+    const logs = recent
+        .slice(-40)
+        .reverse()
+        .map((log) => ({ ip: log.ip, ua: log.ua, timestamp: log.ts, note: log.note }));
+    res.json({ logs, sessions: count });
 });
 app.get('/api/identity', (_req, res) => {
     res.json({ name: DEFAULT_NAME });
@@ -135,7 +164,8 @@ app.get('/api/metrics', async (req, res) => {
     const snapshot = await (0, metrics_1.collectMetrics)(currentLoad, loadManager_1.loadManager.getProfile());
     const name = extractName(req);
     updateLeaderboard(name, snapshot);
-    res.json(snapshot);
+    const { count } = recentSessions();
+    res.json({ ...snapshot, sessions: count });
 });
 app.post('/api/load/:level', (req, res) => {
     const level = req.params.level;
